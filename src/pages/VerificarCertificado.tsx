@@ -1,3 +1,4 @@
+import Marca from '../components/Marca';
 import {
   useQuery,
 } from '@tanstack/react-query';
@@ -47,8 +48,9 @@ export default function VerificarCertificado() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f7fc] px-4 py-10">
+    <div className="min-h-screen bg-[#f4f7fb] px-4 py-10">
       <main className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-7 shadow-xl">
+          <div className="mb-5"><Marca /></div>
         <div
           className={`rounded-2xl p-5 ${
             data.valido
@@ -108,13 +110,13 @@ export default function VerificarCertificado() {
             href={`${API_BASE_URL}/certificacion/certificado/${encodeURIComponent(codigo)}/pdf`}
             target="_blank"
             rel="noreferrer"
-            className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white"
+            className="rounded-xl bg-[#254a7e] px-5 py-3 text-sm font-semibold text-white"
           >
             Abrir PDF firmado
           </a>
         </div>}
 
-        <h2 className="mt-8 font-semibold text-[#202a47]">
+        <h2 className="mt-8 font-semibold text-[#10274d]">
           Trazabilidad
         </h2>
 
@@ -126,7 +128,7 @@ export default function VerificarCertificado() {
                 key={`${evento.tipo}-${evento.fecha}`}
                 className="rounded-xl border border-slate-100 px-4 py-3"
               >
-                <p className="text-sm font-semibold text-[#202a47]">
+                <p className="text-sm font-semibold text-[#10274d]">
                   {evento.tipo}
                 </p>
                 <p className="text-xs text-slate-500">
@@ -157,7 +159,7 @@ function Dato({
       <p className="text-xs uppercase text-slate-400">
         {label}
       </p>
-      <p className="mt-1 font-semibold text-[#202a47]">
+      <p className="mt-1 font-semibold text-[#10274d]">
         {value}
       </p>
     </div>

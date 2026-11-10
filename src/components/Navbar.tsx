@@ -1,3 +1,4 @@
+import Marca from './Marca';
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -155,7 +156,7 @@ export default function Navbar() {
     <nav className="border-b border-slate-200 relative">
       <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <span className="font-display text-lg text-ink">Sertiva</span>
+          <Marca />
 
           {/* Links — visibles desde tablet en adelante */}
           <div className="hidden md:flex gap-2">

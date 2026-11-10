@@ -125,12 +125,12 @@ export default function Proveedores() {
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           
-          <h1 className="text-3xl font-semibold text-[#202a47]">Proveedores</h1>
+          <h1 className="text-3xl font-semibold text-[#10274d]">Proveedores</h1>
         </div>
 
         <button
           onClick={() => setMostrarNuevo(true)}
-          className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#203ba0]"
+          className="rounded-xl bg-[#254a7e] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#18375e]"
         >
           + Nuevo proveedor
         </button>
@@ -147,13 +147,13 @@ export default function Proveedores() {
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           placeholder="Buscar proveedor por nombre, identificación, correo o teléfono..."
-          className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#284bc2]"
+          className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#254a7e]"
         />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="font-semibold text-[#202a47]">Directorio de proveedores</h2>
+          <h2 className="font-semibold text-[#10274d]">Directorio de proveedores</h2>
           <p className="mt-1 text-xs text-slate-500">{proveedores.length} proveedor(s)</p>
         </div>
 
@@ -161,7 +161,7 @@ export default function Proveedores() {
           <p className="p-6 text-sm text-slate-500">Cargando proveedores...</p>
         ) : proveedores.length === 0 ? (
           <div className="p-10 text-center">
-            <p className="font-medium text-[#202a47]">Todavía no hay proveedores</p>
+            <p className="font-medium text-[#10274d]">Todavía no hay proveedores</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -180,7 +180,7 @@ export default function Proveedores() {
                 {proveedores.map((proveedor) => (
                   <tr key={proveedor.id} className="border-t border-slate-100 hover:bg-slate-50/60">
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-[#202a47]">{proveedor.nombreRazonSocial}</p>
+                      <p className="font-semibold text-[#10274d]">{proveedor.nombreRazonSocial}</p>
                       {proveedor.nombreContacto && (
                         <p className="text-xs text-slate-500">{proveedor.nombreContacto}</p>
                       )}
@@ -267,7 +267,7 @@ function Kpi({ etiqueta, valor }: { etiqueta: string; valor: number }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <p className="text-xs uppercase tracking-wide text-slate-500">{etiqueta}</p>
-      <p className="mt-2 text-2xl font-semibold text-[#202a47]">{valor}</p>
+      <p className="mt-2 text-2xl font-semibold text-[#10274d]">{valor}</p>
     </div>
   );
 }
@@ -277,7 +277,7 @@ function Modal({ titulo, children, onClose }: { titulo: string; children: React.
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
-          <h3 className="text-xl font-semibold text-[#202a47]">{titulo}</h3>
+          <h3 className="text-xl font-semibold text-[#10274d]">{titulo}</h3>
           <button onClick={onClose} className="h-9 w-9 rounded-lg text-xl text-slate-400 hover:bg-slate-100">×</button>
         </div>
         <div className="p-6">{children}</div>
@@ -319,7 +319,7 @@ function FormularioContacto({
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Tipo de identificación</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Tipo de identificación</label>
           <select {...campo('tipoIdentificacion')} className="w-full rounded-xl border border-slate-200 px-3 py-2.5">
             <option value="NIT">NIT</option>
             <option value="CC">Cédula de ciudadanía</option>
@@ -329,49 +329,49 @@ function FormularioContacto({
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Número de identificación</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Número de identificación</label>
           <input {...campo('numeroIdentificacion')} required className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
 
         <div className="md:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Nombre / Razón social</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Nombre / Razón social</label>
           <input {...campo('nombreRazonSocial')} required className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Persona de contacto</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Persona de contacto</label>
           <input {...campo('nombreContacto')} className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Correo</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Correo</label>
           <input {...campo('correo')} type="email" className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Teléfono</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Teléfono</label>
           <input {...campo('telefono')} className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Ciudad</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Ciudad</label>
           <input {...campo('ciudad')} className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Departamento</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Departamento</label>
           <input {...campo('departamento')} className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">País</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">País</label>
           <input {...campo('pais')} className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
         <div className="md:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Dirección</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Dirección</label>
           <input {...campo('direccion')} className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
         <div className="md:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Responsabilidad fiscal</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Responsabilidad fiscal</label>
           <input {...campo('responsabilidadFiscal')} placeholder="Opcional" className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
         <div className="md:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-[#202a47]">Notas</label>
+          <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Notas</label>
           <textarea {...campo('notas')} rows={3} className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
       </div>
@@ -381,7 +381,7 @@ function FormularioContacto({
       <div className="mt-6 flex justify-end">
         <button
           disabled={disabled}
-          className="rounded-xl bg-[#284bc2] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="rounded-xl bg-[#254a7e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
           {textoBoton}
         </button>

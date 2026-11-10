@@ -1,3 +1,4 @@
+import Marca from '../components/Marca';
 import {
   useEffect,
   useMemo,
@@ -127,7 +128,7 @@ export default function CertificarPublico() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-[#f5f7fc] p-8 text-slate-500">
+      <div className="min-h-screen bg-[#f4f7fb] p-8 text-slate-500">
         Cargando documento...
       </div>
     );
@@ -159,15 +160,16 @@ export default function CertificarPublico() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f7fc] px-4 py-8 md:py-12">
+    <div className="min-h-screen bg-[#f4f7fb] px-4 py-8 md:py-12">
       <main className="mx-auto max-w-5xl">
         <header className="mb-5 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
+          <div className="mb-4"><Marca /></div>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-[#284bc2]">
-                Sertiva · documento para firma
+              <p className="text-xs uppercase tracking-[0.18em] text-[#254a7e]">
+                Documento para firma
               </p>
-              <h1 className="mt-1 text-2xl font-semibold text-[#202a47]">
+              <h1 className="mt-1 text-2xl font-semibold text-[#10274d]">
                 {data.empresa}
               </h1>
               <p className="mt-1 text-sm text-slate-500">
@@ -186,7 +188,7 @@ export default function CertificarPublico() {
               <p className="text-xs uppercase tracking-[0.16em] text-slate-500">
                 Revisión del contenido
               </p>
-              <h2 className="mt-1 text-xl font-semibold text-[#202a47]">
+              <h2 className="mt-1 text-xl font-semibold text-[#10274d]">
                 Documento enviado para tu revisión
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -245,7 +247,7 @@ export default function CertificarPublico() {
                 onClick={() =>
                   enviarOtp.mutate()
                 }
-                className="rounded-xl bg-[#284bc2] px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                className="rounded-xl bg-[#254a7e] px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
                 Firmar documento
               </button>
@@ -255,11 +257,11 @@ export default function CertificarPublico() {
 
         {paso === 'OTP' && (
           <section className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.16em] text-[#284bc2]">
+            <p className="text-xs uppercase tracking-[0.16em] text-[#254a7e]">
               Validación de correo
             </p>
 
-            <h2 className="mt-2 text-2xl font-semibold text-[#202a47]">
+            <h2 className="mt-2 text-2xl font-semibold text-[#10274d]">
               Revisa tu correo
             </h2>
 
@@ -297,7 +299,7 @@ export default function CertificarPublico() {
               onClick={() =>
                 validarOtp.mutate()
               }
-              className="mt-4 w-full rounded-xl bg-[#284bc2] px-5 py-3 font-semibold text-white disabled:opacity-50"
+              className="mt-4 w-full rounded-xl bg-[#254a7e] px-5 py-3 font-semibold text-white disabled:opacity-50"
             >
               Validar código
             </button>
@@ -311,7 +313,7 @@ export default function CertificarPublico() {
               Correo validado
             </div>
 
-            <h2 className="text-2xl font-semibold text-[#202a47]">
+            <h2 className="text-2xl font-semibold text-[#10274d]">
               Completa tu identificación
             </h2>
 
@@ -433,7 +435,7 @@ function TablaContenido({
                 }
                 className="border-t border-slate-100"
               >
-                <td className="px-4 py-3 font-semibold text-[#202a47]">
+                <td className="px-4 py-3 font-semibold text-[#10274d]">
                   {item.nombreProducto ??
                     item.nombre ??
                     item.producto ??
@@ -569,7 +571,7 @@ function Finalizado({
         ✓
       </div>
 
-      <h2 className="mt-4 text-2xl font-semibold text-[#202a47]">
+      <h2 className="mt-4 text-2xl font-semibold text-[#10274d]">
         Documento firmado y sellado
       </h2>
 
@@ -577,7 +579,7 @@ function Finalizado({
         El proceso solicitado por {empresa} fue completado. También recibirás un correo con el certificado final y su enlace de verificación.
       </p>
 
-      <p className="mt-4 text-sm font-semibold text-[#284bc2]">
+      <p className="mt-4 text-sm font-semibold text-[#254a7e]">
         {resultado.codigoVerificacion}
       </p>
 
@@ -586,7 +588,7 @@ function Finalizado({
           href={
             resultado.urlVerificacion
           }
-          className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#254a7e] px-5 py-3 text-sm font-semibold text-white"
         >
           Ver certificado
         </a>
@@ -597,7 +599,7 @@ function Finalizado({
           }
           target="_blank"
           rel="noreferrer"
-          className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-[#284bc2]"
+          className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-[#254a7e]"
         >
           Abrir PDF firmado
         </a>
@@ -621,7 +623,7 @@ function EstadoPaso({
           : 'Firmado';
 
   return (
-    <span className="rounded-full bg-[#edf1ff] px-3 py-1.5 text-xs font-semibold text-[#284bc2]">
+    <span className="rounded-full bg-[#edf3fa] px-3 py-1.5 text-xs font-semibold text-[#254a7e]">
       {label}
     </span>
   );
@@ -640,7 +642,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium text-[#202a47]">
+      <label className="mb-1.5 block text-sm font-medium text-[#10274d]">
         {label}
       </label>
       <input
@@ -669,7 +671,7 @@ function Fila({
     <div
       className={`flex justify-between gap-4 py-1 text-sm ${
         strong
-          ? 'font-semibold text-[#202a47]'
+          ? 'font-semibold text-[#10274d]'
           : 'text-slate-600'
       }`}
     >

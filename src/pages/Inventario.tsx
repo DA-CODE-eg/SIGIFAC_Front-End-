@@ -26,8 +26,8 @@ type Movimiento = {
 
 const caja = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm';
 const campo = 'mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900';
-const boton = 'rounded-lg bg-[#284bc2] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50';
-const enlace = 'rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-[#284bc2]';
+const boton = 'rounded-lg bg-[#254a7e] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50';
+const enlace = 'rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-[#254a7e]';
 const moneda = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' });
 const normalizar = (texto: string) => texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 const codigo = (id: number) => `PRD-${id}`;
@@ -134,7 +134,7 @@ export default function Inventario() {
     <main className="mx-auto max-w-7xl space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-semibold text-[#202a47]">Inventario nacional</h1>
+          <h1 className="text-3xl font-semibold text-[#10274d]">Inventario nacional</h1>
           <p className="mt-1 text-sm text-slate-600">Organiza productos por categoría y consulta sus existencias y movimientos.</p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -24,7 +24,7 @@ type Operacion = 'ENTRADA' | 'SALIDA' | 'TRASLADO' | 'CONTEO' | 'ASIGNAR';
 
 const card = 'rounded-2xl border border-slate-200 bg-white p-5';
 const field = 'mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2';
-const primary = 'rounded-lg bg-[#284bc2] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50';
+const primary = 'rounded-lg bg-[#254a7e] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50';
 const secondary = 'rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm font-semibold text-indigo-800 disabled:opacity-50';
 const apiBase = '/inventario-sedes';
 

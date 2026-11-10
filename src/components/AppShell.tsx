@@ -103,15 +103,15 @@ export default function AppShell({ children }: AppShellProps) {
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
       isActive
-        ? 'bg-[#e9eeff] text-[#284bc2]'
-        : 'text-slate-600 hover:bg-[#f0f4ff] hover:text-[#284bc2]'
+        ? 'bg-[#e9eeff] text-[#254a7e]'
+        : 'text-slate-600 hover:bg-[#f0f4ff] hover:text-[#254a7e]'
     }`;
 
   return (
-    <div className="min-h-screen bg-paper text-[#202a47]">
+    <div className="min-h-screen bg-paper text-[#10274d]">
       <div className="flex min-h-screen">
         <aside
-          className={`fixed top-0 left-0 z-40 h-screen w-[280px] border-r border-[#e1e7f5] bg-white text-ink p-5 flex flex-col overflow-y-auto transition-transform duration-300 lg:translate-x-0 ${
+          className={`fixed top-0 left-0 z-40 h-screen w-[280px] border-r border-[#dce6f1] bg-white text-ink p-5 flex flex-col overflow-y-auto transition-transform duration-300 lg:translate-x-0 ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
@@ -158,7 +158,7 @@ export default function AppShell({ children }: AppShellProps) {
                 <button type="button" className="lg:hidden rounded-xl border border-slate-200 bg-white px-3 py-2" onClick={() => setSidebarOpen(true)}>☰</button>
                 <div className="min-w-0">
                   
-                  <h1 className="truncate text-base sm:text-lg font-semibold text-[#202a47]">{nombreEmpresa}</h1>
+                  <h1 className="truncate text-base sm:text-lg font-semibold text-[#10274d]">{nombreEmpresa}</h1>
                 </div>
               </div>
 

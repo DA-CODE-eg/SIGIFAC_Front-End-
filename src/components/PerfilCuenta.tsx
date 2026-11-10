@@ -80,7 +80,7 @@ export default function PerfilCuenta() {
   const foto = perfil.data?.foto;
   const iniciales = nombre.trim().split(/\s+/).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase();
   const avatar = (clase: string) => (
-    <span className={`grid shrink-0 place-items-center overflow-hidden rounded-full bg-[#e9eeff] font-semibold text-[#284bc2] ${clase}`}>
+    <span className={`grid shrink-0 place-items-center overflow-hidden rounded-full bg-[#e9eeff] font-semibold text-[#254a7e] ${clase}`}>
       {foto?.startsWith('data:image/jpeg;base64,') ? <img src={foto} alt="" className="size-full object-cover" /> : iniciales}
     </span>
   );

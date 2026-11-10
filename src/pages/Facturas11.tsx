@@ -703,7 +703,7 @@ export default function Facturas() {
           <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
             Ventas · inventario · cartera
           </p>
-          <h1 className="text-3xl font-semibold text-[#202a47]">
+          <h1 className="text-3xl font-semibold text-[#10274d]">
             Facturación
           </h1>
           <p className="mt-2 max-w-3xl text-slate-500">
@@ -716,7 +716,7 @@ export default function Facturas() {
           onClick={() =>
             setMostrarNueva(true)
           }
-          className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white shadow-sm"
+          className="rounded-xl bg-[#254a7e] px-5 py-3 text-sm font-semibold text-white shadow-sm"
         >
           + Crear factura
         </button>
@@ -805,7 +805,7 @@ export default function Facturas() {
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="font-semibold text-[#202a47]">
+          <h2 className="font-semibold text-[#10274d]">
             Facturas
           </h2>
           <p className="mt-1 text-xs text-slate-500">
@@ -858,7 +858,7 @@ export default function Facturas() {
                       key={factura.id}
                       className="border-t border-slate-100"
                     >
-                      <td className="px-4 py-3 font-semibold text-[#202a47]">
+                      <td className="px-4 py-3 font-semibold text-[#10274d]">
                         {factura.numeroFactura ??
                           `#${factura.id}`}
                       </td>
@@ -949,7 +949,7 @@ export default function Facturas() {
                                     factura,
                                   )
                                 }
-                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#284bc2]"
+                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#254a7e]"
                               >
                                 Link de pago
                               </button>
@@ -1054,7 +1054,7 @@ export default function Facturas() {
                               }
                               className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50"
                             >
-                              <p className="text-sm font-semibold text-[#202a47]">
+                              <p className="text-sm font-semibold text-[#10274d]">
                                 {
                                   cliente.nombreRazonSocial
                                 }
@@ -1109,7 +1109,7 @@ export default function Facturas() {
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="text-sm font-semibold text-[#202a47]">
+                              <p className="text-sm font-semibold text-[#10274d]">
                                 {
                                   producto.nombre
                                 }
@@ -1197,7 +1197,7 @@ export default function Facturas() {
                             className="border-t border-slate-100"
                           >
                             <td className="px-3 py-3">
-                              <p className="font-semibold text-[#202a47]">
+                              <p className="font-semibold text-[#10274d]">
                                 {
                                   item.nombre
                                 }
@@ -1366,7 +1366,7 @@ export default function Facturas() {
                   <p className="text-xs uppercase tracking-wide text-slate-500">
                     Total factura
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-[#202a47]">
+                  <p className="mt-2 text-3xl font-semibold text-[#10274d]">
                     {moneda(
                       totalFactura,
                     )}
@@ -1416,7 +1416,7 @@ export default function Facturas() {
                   onClick={
                     confirmarCrearFactura
                   }
-                  className="rounded-xl bg-[#284bc2] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                  className="rounded-xl bg-[#254a7e] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {crearFactura.isPending
                     ? 'Creando...'
@@ -1473,7 +1473,7 @@ export default function Facturas() {
               />
             </div>
 
-            <h3 className="mt-6 font-semibold text-[#202a47]">
+            <h3 className="mt-6 font-semibold text-[#10274d]">
               Productos facturados
             </h3>
 
@@ -1556,7 +1556,7 @@ export default function Facturas() {
               </table>
             </div>
 
-            <h3 className="mt-6 font-semibold text-[#202a47]">
+            <h3 className="mt-6 font-semibold text-[#10274d]">
               Pagos
             </h3>
 
@@ -1698,7 +1698,7 @@ export default function Facturas() {
               disabled={
                 registrarPago.isPending
               }
-              className="rounded-xl bg-[#284bc2] px-5 py-2.5 font-semibold text-white"
+              className="rounded-xl bg-[#254a7e] px-5 py-2.5 font-semibold text-white"
             >
               Registrar pago
             </button>
@@ -1793,7 +1793,7 @@ function Kpi({
       <p className="text-xs uppercase tracking-wide text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold text-[#202a47]">
+      <p className="mt-2 text-2xl font-semibold text-[#10274d]">
         {value}
       </p>
     </div>
@@ -1842,7 +1842,7 @@ function Modal({
         className={`max-h-[92vh] w-full ${size} overflow-y-auto rounded-2xl bg-white shadow-2xl`}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
-          <h2 className="text-xl font-semibold text-[#202a47]">
+          <h2 className="text-xl font-semibold text-[#10274d]">
             {title}
           </h2>
 
@@ -1903,7 +1903,7 @@ function Dato({
       <p className="text-xs uppercase text-slate-500">
         {label}
       </p>
-      <p className="mt-1 font-semibold text-[#202a47]">
+      <p className="mt-1 font-semibold text-[#10274d]">
         {value}
       </p>
     </div>
@@ -1922,7 +1922,7 @@ function ClienteSeleccionado({
   return (
     <div className="mt-3 flex items-start justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4">
       <div>
-        <p className="font-semibold text-[#202a47]">
+        <p className="font-semibold text-[#10274d]">
           {
             cliente.nombreRazonSocial
           }
@@ -1937,7 +1937,7 @@ function ClienteSeleccionado({
       <button
         type="button"
         onClick={onClear}
-        className="text-xs font-semibold text-[#284bc2]"
+        className="text-xs font-semibold text-[#254a7e]"
       >
         Cambiar
       </button>

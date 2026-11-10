@@ -28,10 +28,10 @@ export default function AdminShell({ children }: AdminShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-paper text-[#202a47]">
+    <div className="min-h-screen bg-paper text-[#10274d]">
       <div className="flex min-h-screen">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[280px] border-r border-[#e1e7f5] bg-white text-ink p-5 flex flex-col transition-transform duration-300 lg:translate-x-0 overflow-y-auto lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:z-auto ${
+          className={`fixed inset-y-0 left-0 z-40 w-[280px] border-r border-[#dce6f1] bg-white text-ink p-5 flex flex-col transition-transform duration-300 lg:translate-x-0 overflow-y-auto lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:z-auto ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
@@ -56,8 +56,8 @@ export default function AdminShell({ children }: AdminShellProps) {
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-[#e9eeff] text-[#284bc2]'
-                      : 'text-slate-600 hover:bg-[#f0f4ff] hover:text-[#284bc2]'
+                      ? 'bg-[#e9eeff] text-[#254a7e]'
+                      : 'text-slate-600 hover:bg-[#f0f4ff] hover:text-[#254a7e]'
                   }`
                 }
               >
@@ -91,7 +91,7 @@ export default function AdminShell({ children }: AdminShellProps) {
                 </button>
                 <div className="min-w-0">
                   
-                  <h1 className="truncate text-base sm:text-lg font-semibold text-[#202a47]">Administración global</h1>
+                  <h1 className="truncate text-base sm:text-lg font-semibold text-[#10274d]">Administración global</h1>
                 </div>
               </div>
 

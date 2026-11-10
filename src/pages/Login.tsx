@@ -184,10 +184,10 @@ export default function Login() {
 
   return (
     <main className="grid min-h-screen bg-[#f7f9ff] lg:grid-cols-[1fr_1fr]">
-      <section className="relative hidden flex-col justify-between overflow-hidden border-r border-indigo-100 bg-gradient-to-br from-[#f3f7ff] via-[#e9efff] to-[#eae4fd] p-12 lg:flex xl:p-16">
+      <section className="relative hidden flex-col justify-between overflow-hidden border-r border-indigo-100 bg-gradient-to-br from-[#f3f7fb] via-[#eaf1fa] to-[#e3edf8] p-12 lg:flex xl:p-16">
         <Marca />
         <div className="relative my-10 flex max-w-xl flex-1 flex-col items-start justify-center">
-          <div className="mb-8 inline-flex rounded-full border border-indigo-100 bg-white/75 px-4 py-2 text-sm font-semibold text-[#344ca2]">
+          <div className="mb-8 inline-flex rounded-full border border-indigo-100 bg-white/75 px-4 py-2 text-sm font-semibold text-[#254a7e]">
             Gestión y certificación
           </div>
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-ink xl:text-5xl">
@@ -199,7 +199,7 @@ export default function Login() {
         </div>
       </section>
       <section className="flex items-center justify-center p-5 sm:p-10">
-        <div className="w-full max-w-md rounded-3xl border border-[#e1e7f5] bg-white p-6 shadow-[0_18px_55px_#203d9010] sm:p-9">
+        <div className="w-full max-w-md rounded-3xl border border-[#dce6f1] bg-white p-6 shadow-[0_18px_55px_#203d9010] sm:p-9">
           <div className="mb-7 lg:hidden"><Marca /></div>
           <h2 className="text-3xl font-bold tracking-tight text-ink">Iniciar sesión</h2>
           <p className="mb-7 mt-2 text-sm text-slate-600">Accede a tu espacio de trabajo.</p>

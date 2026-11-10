@@ -456,7 +456,7 @@ export default function Productos() {
             Catálogo global · productos
           </p>
 
-          <h1 className="text-3xl font-semibold text-[#202a47]">
+          <h1 className="text-3xl font-semibold text-[#10274d]">
             Productos
           </h1>
 
@@ -473,7 +473,7 @@ export default function Productos() {
               '/inventario',
             )
           }
-          className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#254a7e] px-5 py-3 text-sm font-semibold text-white"
         >
           + Agregar a inventario
         </button>
@@ -509,7 +509,7 @@ export default function Productos() {
             setBuscar(e.target.value)
           }
           placeholder="Buscar producto, referencia, proveedor, categoría..."
-          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#284bc2]"
+          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#254a7e]"
         />
 
         <select
@@ -582,7 +582,7 @@ export default function Productos() {
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <div>
-            <h2 className="font-semibold text-[#202a47]">
+            <h2 className="font-semibold text-[#10274d]">
               Catálogo de productos
             </h2>
             <p className="mt-1 text-xs text-slate-500">
@@ -593,7 +593,7 @@ export default function Productos() {
           <button
             type="button"
             onClick={() => refetch()}
-            className="text-xs font-semibold text-[#284bc2]"
+            className="text-xs font-semibold text-[#254a7e]"
           >
             Actualizar
           </button>
@@ -654,7 +654,7 @@ export default function Productos() {
                   >
                     <td className="px-4 py-3">
                       <div className="max-w-[210px]">
-                        <p className="truncate font-semibold text-[#202a47]">
+                        <p className="truncate font-semibold text-[#10274d]">
                           {p.nombre}
                         </p>
 
@@ -742,7 +742,7 @@ export default function Productos() {
                                 p,
                               )
                             }
-                            className="rounded-lg border border-[#b9cce2] bg-[#edf1ff] px-2.5 py-1.5 text-xs font-semibold text-[#284bc2]"
+                            className="rounded-lg border border-[#b9cce2] bg-[#edf3fa] px-2.5 py-1.5 text-xs font-semibold text-[#254a7e]"
                           >
                             Relacionar
                           </button>
@@ -756,7 +756,7 @@ export default function Productos() {
                                   `/facturas?registroId=${p.registroId}`,
                                 )
                               }
-                              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-[#284bc2] disabled:opacity-40"
+                              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-[#254a7e] disabled:opacity-40"
                             >
                               Facturar
                             </button>
@@ -769,7 +769,7 @@ export default function Productos() {
                                   `/certificacion?registroId=${p.registroId}`,
                                 )
                               }
-                              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-[#6548b6] disabled:opacity-40"
+                              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-[#254a7e] disabled:opacity-40"
                             >
                               Certificar
                             </button>
@@ -872,7 +872,7 @@ export default function Productos() {
                 />
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-[#202a47]">
+                  <label className="mb-1.5 block text-sm font-medium text-[#10274d]">
                     Estado
                   </label>
 
@@ -899,7 +899,7 @@ export default function Productos() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-1.5 block text-sm font-medium text-[#202a47]">
+                  <label className="mb-1.5 block text-sm font-medium text-[#10274d]">
                     Descripción
                   </label>
 
@@ -1005,7 +1005,7 @@ function Kpi({
         {label}
       </p>
 
-      <p className="mt-2 text-2xl font-semibold text-[#202a47]">
+      <p className="mt-2 text-2xl font-semibold text-[#10274d]">
         {value}
       </p>
     </div>
@@ -1074,7 +1074,7 @@ function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
-          <h2 className="text-xl font-semibold text-[#202a47]">
+          <h2 className="text-xl font-semibold text-[#10274d]">
             {title}
           </h2>
 
@@ -1110,7 +1110,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium text-[#202a47]">
+      <label className="mb-1.5 block text-sm font-medium text-[#10274d]">
         {label}
       </label>
 
@@ -1147,7 +1147,7 @@ function ModalActions({
       <button
         type="submit"
         disabled={loading}
-        className="rounded-xl bg-[#284bc2] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+        className="rounded-xl bg-[#254a7e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
       >
         {loading
           ? 'Guardando...'

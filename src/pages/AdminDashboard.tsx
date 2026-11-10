@@ -37,7 +37,7 @@ export default function AdminDashboard() {
   const cards = [
     { label: 'Empresas registradas', value: resumen?.empresas ?? 0, note: 'Tenants creados', accent: 'border-[#4a7be5]' },
     { label: 'Empresas activas', value: resumen?.empresasActivas ?? 0, note: 'Operando actualmente', accent: 'border-[#43a66e]' },
-    { label: 'Usuarios', value: resumen?.usuarios ?? 0, note: 'Usuarios de empresas', accent: 'border-[#6548b6]' },
+    { label: 'Usuarios', value: resumen?.usuarios ?? 0, note: 'Usuarios de empresas', accent: 'border-[#254a7e]' },
     { label: 'Administradores', value: resumen?.administradores ?? 0, note: 'Administradores empresa', accent: 'border-[#d9a441]' },
   ];
 
@@ -47,15 +47,15 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <section className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-[#284bc2]">Control global</p>
-          <h2 className="mt-1 text-3xl font-semibold tracking-tight text-[#202a47]">Resumen de plataforma</h2>
+          <p className="text-sm font-medium text-[#254a7e]">Control global</p>
+          <h2 className="mt-1 text-3xl font-semibold tracking-tight text-[#10274d]">Resumen de plataforma</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
             Aquí administras la estructura de Sertiva. No se muestran inventarios, productos ni facturación de las empresas.
           </p>
         </div>
         <Link
           to="/admin/empresas"
-          className="inline-flex justify-center rounded-xl bg-[#284bc2] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#203ba0]"
+          className="inline-flex justify-center rounded-xl bg-[#254a7e] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#18375e]"
         >
           Gestionar empresas
         </Link>
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
         {cards.map((card) => (
           <div key={card.label} className={`rounded-2xl border border-slate-200 border-l-4 ${card.accent} bg-white p-5 shadow-sm`}>
             <p className="text-sm text-slate-500">{card.label}</p>
-            <p className="mt-2 text-3xl font-semibold text-[#202a47]">{cargandoResumen ? '—' : card.value}</p>
+            <p className="mt-2 text-3xl font-semibold text-[#10274d]">{cargandoResumen ? '—' : card.value}</p>
             <p className="mt-1 text-xs text-slate-500">{card.note}</p>
           </div>
         ))}
@@ -77,17 +77,17 @@ export default function AdminDashboard() {
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-4 mb-4">
             <div>
-              <h3 className="text-xl font-semibold text-[#202a47]">Empresas recientes</h3>
+              <h3 className="text-xl font-semibold text-[#10274d]">Empresas recientes</h3>
               <p className="text-sm text-slate-500 mt-1">Vista administrativa, sin datos operacionales.</p>
             </div>
-            <Link to="/admin/empresas" className="text-sm font-medium text-[#284bc2] hover:underline">Ver todas</Link>
+            <Link to="/admin/empresas" className="text-sm font-medium text-[#254a7e] hover:underline">Ver todas</Link>
           </div>
 
           {cargandoEmpresas ? (
             <p className="py-8 text-center text-sm text-slate-500">Cargando empresas...</p>
           ) : recientes.length === 0 ? (
             <div className="rounded-xl bg-slate-50 border border-dashed border-slate-300 p-8 text-center">
-              <p className="font-medium text-[#202a47]">No hay empresas registradas</p>
+              <p className="font-medium text-[#10274d]">No hay empresas registradas</p>
               <p className="text-sm text-slate-500 mt-1">Crea el primer empresa desde Gestión de empresas.</p>
             </div>
           ) : (
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
                   {recientes.map((empresa) => (
                     <tr key={empresa.id} className="border-b border-slate-100 last:border-b-0">
                       <td className="py-4">
-                        <p className="font-medium text-[#202a47]">{empresa.nombreEmpresa}</p>
+                        <p className="font-medium text-[#10274d]">{empresa.nombreEmpresa}</p>
                         <p className="text-xs text-slate-500 mt-0.5">{empresa.correoContacto}</p>
                       </td>
                       <td className="py-4 text-slate-600">{empresa.identificacion}</td>
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="py-4 text-right">
-                        <Link to={`/admin/empresas/${empresa.id}`} className="text-sm font-medium text-[#284bc2] hover:underline">
+                        <Link to={`/admin/empresas/${empresa.id}`} className="text-sm font-medium text-[#254a7e] hover:underline">
                           Configurar
                         </Link>
                       </td>
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h3 className="text-xl font-semibold text-[#202a47]">Alcance del SUPER_ADMIN</h3>
+          <h3 className="text-xl font-semibold text-[#10274d]">Alcance del SUPER_ADMIN</h3>
           <div className="mt-4 space-y-3 text-sm text-slate-600">
             {[
               'Crear y actualizar empresas.',
@@ -143,7 +143,7 @@ export default function AdminDashboard() {
               'Mantener separado el contenido operacional.',
             ].map((item) => (
               <div key={item} className="flex gap-3 rounded-xl bg-slate-50 p-3">
-                <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-[#284bc2]/10 text-[#284bc2] flex items-center justify-center text-xs font-bold">✓</span>
+                <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-[#254a7e]/10 text-[#254a7e] flex items-center justify-center text-xs font-bold">✓</span>
                 <p>{item}</p>
               </div>
             ))}

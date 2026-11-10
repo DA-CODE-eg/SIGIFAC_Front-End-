@@ -140,7 +140,7 @@ export default function Reportes() {
           <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
             Información · exportación · control
           </p>
-          <h1 className="text-3xl font-semibold text-[#202a47]">
+          <h1 className="text-3xl font-semibold text-[#10274d]">
             Reportes
           </h1>
           <p className="mt-2 max-w-3xl text-slate-500">
@@ -158,7 +158,7 @@ export default function Reportes() {
                   onClick={() => setFormato(item)}
                   className={`rounded-xl px-4 py-2 text-sm font-semibold ${
                     formato === item
-                      ? 'bg-[#284bc2] text-white'
+                      ? 'bg-[#254a7e] text-white'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -192,7 +192,7 @@ export default function Reportes() {
         {resumen.data && <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-semibold">{formatoNumero.format(resumen.data.total)} registros {resumen.data.unidad ? '· COP' : ''}</p>
-            {seleccionado && <button type="button" disabled={!!descargando} onClick={() => void descargar(seleccionado, true)} className="rounded-lg bg-[#284bc2] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Exportar con filtros</button>}
+            {seleccionado && <button type="button" disabled={!!descargando} onClick={() => void descargar(seleccionado, true)} className="rounded-lg bg-[#254a7e] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Exportar con filtros</button>}
           </div>
           {resumen.data.serie.length > 0 ? <>
             <div className="h-72 w-full" aria-label={`Gráfico de ${seleccionado?.nombre ?? tipo}`}>
@@ -203,7 +203,7 @@ export default function Reportes() {
                   <YAxis tickFormatter={(valor) => new Intl.NumberFormat('es-CO', { notation: 'compact' }).format(Number(valor))} />
                   <Tooltip formatter={(valor) => formatoNumero.format(Number(valor))} />
                   <Legend verticalAlign="top" />
-                  <Bar dataKey="valor" name={resumen.data.etiqueta} fill="#284bc2" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="valor" name={resumen.data.etiqueta} fill="#254a7e" radius={[4, 4, 0, 0]} />
                   {resumen.data.comparativo && <Bar dataKey="comparativo" name={resumen.data.comparativo} fill="#7955c7" radius={[4, 4, 0, 0]} />}
                 </BarChart>
               </ResponsiveContainer>
@@ -225,14 +225,14 @@ export default function Reportes() {
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           placeholder="Buscar reporte..."
-          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#284bc2]"
+          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#254a7e]"
         />
       </div>
 
       {grupos.map((grupo) => (
         <section key={grupo}>
           <div className="mb-3 flex items-center gap-3">
-            <h2 className="text-lg font-semibold text-[#202a47]">
+            <h2 className="text-lg font-semibold text-[#10274d]">
               {grupo}
             </h2>
             <div className="h-px flex-1 bg-slate-200" />
@@ -251,7 +251,7 @@ export default function Reportes() {
                       <p className="text-xs uppercase tracking-wide text-slate-400">
                         {reporte.grupo}
                       </p>
-                      <h3 className="mt-1 font-semibold text-[#202a47]">
+                      <h3 className="mt-1 font-semibold text-[#10274d]">
                         {reporte.nombre}
                       </h3>
                       <p className="mt-2 text-sm text-slate-500">
@@ -259,7 +259,7 @@ export default function Reportes() {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-[#edf1ff] px-2.5 py-1 text-xs font-semibold text-[#284bc2]">
+                    <span className="rounded-full bg-[#edf3fa] px-2.5 py-1 text-xs font-semibold text-[#254a7e]">
                       {formato === 'XLSX'
                         ? 'Excel'
                         : formato}
@@ -272,7 +272,7 @@ export default function Reportes() {
                     disabled={
                       descargando === reporte.tipo
                     }
-                    className="mt-5 w-full rounded-xl bg-[#284bc2] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                    className="mt-5 w-full rounded-xl bg-[#254a7e] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                   >
                     {descargando === reporte.tipo
                       ? 'Generando...'

@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="17" fill="#284bc2"/>
-  <path d="M19 17h14l13 13-15 16H19z" fill="#fff"/>
-  <path d="M31 17v14h15" fill="#94e2ff"/>
-  <path d="m28 47 7 7 17-19" fill="none" stroke="#94e2ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Sertiva">
+  <title>Sertiva</title>
+  <path fill="#10274D" d="M43 8a8 8 0 0 1 8 0l29 17a8 8 0 0 1 4 7v32a8 8 0 0 1-4 7L51 88a8 8 0 0 1-8 0L14 71a8 8 0 0 1-4-7V32a8 8 0 0 1 4-7Z"/>
+  <path fill="none" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round" d="M63 32H39a8 8 0 0 0 0 16h16a8 8 0 0 1 0 16H31"/>
+  <path fill="none" stroke="#6199DE" stroke-width="5.5" stroke-linecap="round" d="M53 22h9"/>
 </svg>
