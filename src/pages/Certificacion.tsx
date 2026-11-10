@@ -69,7 +69,7 @@ export default function Certificacion() {
   const metodoFacial = metodoFirma === 'FACIAL' || metodoFirma === 'CODIGO_FACIAL';
   const { data: metodosFirma } = useQuery({
     queryKey: ['metodos-firma', usuario?.id],
-    queryFn: async () => (await api.get<{ facial: boolean }>('/certificacion/firma/metodos')).data,
+    queryFn: async () => (await api.get<{ facial: boolean; motivo?: string }>('/certificacion/firma/metodos')).data,
   });
   const [uso, setUso] =
     useState<Uso>(
@@ -1104,6 +1104,11 @@ export default function Certificacion() {
               <option value="FACIAL" disabled={!metodosFirma?.facial}>Solo facial</option>
             </select>
           </label>
+          {metodosFirma?.motivo && <p className="mt-2 text-xs text-slate-600">
+            {metodosFirma.motivo === 'ROL' ? 'Solo los administradores pueden iniciar una firma facial.' :
+              metodosFirma.motivo === 'VERIFICADOR_NO_DISPONIBLE' ? 'El verificador facial no responde. Revisa el servicio y su conexión con el backend.' :
+                'La firma facial todavía no está configurada en el backend.'}
+          </p>}
           {metodoFacial && <fieldset className="mt-4 space-y-3 rounded-xl bg-slate-50 p-4 text-sm">
             <legend className="font-semibold text-ink">Referencia facial del firmante</legend>
             <label className="block">Foto frontal de referencia (JPG o PNG)
