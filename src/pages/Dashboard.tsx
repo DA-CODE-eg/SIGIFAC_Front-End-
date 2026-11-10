@@ -30,7 +30,7 @@ const acciones = [
 ];
 
 const pesos = new Intl.NumberFormat('es-CO', {
-  style: 'currency', currency: 'COP', maximumFractionDigits: 0,
+  style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 2,
 });
 const numero = new Intl.NumberFormat('es-CO');
 
@@ -94,6 +94,37 @@ export default function Dashboard() {
           </dl>
         </section>}
 
+        {i && (inventarioVisible || facturasVisibles) && <section aria-labelledby="grafico-general" className="rounded-xl border border-slate-200 bg-white p-5">
+          <header className="mb-5 flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h3 id="grafico-general" className="text-base font-semibold text-ink">Panorama de la operación</h3>
+              <p className="mt-1 text-sm text-slate-600">Datos registrados en toda la empresa</p>
+            </div>
+            {tienePermiso(usuario, 'REPORTES_VER') && <Link to="/reportes" className="text-sm font-semibold text-indigo-800 hover:underline">Ver reportes</Link>}
+          </header>
+          <div className="grid gap-6 lg:grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
+            {inventarioVisible && <GraficoBarras
+              titulo="Disponibilidad de productos"
+              formato={numero}
+              vacio="Todavía no hay productos para graficar."
+              filas={typeof i.productos === 'number' && typeof i.agotados === 'number' && typeof i.bajoStock === 'number' ? [
+                { label: 'Con stock suficiente', valor: i.productos - i.agotados - i.bajoStock, color: 'bg-indigo-600' },
+                { label: 'Bajo stock', valor: i.bajoStock, color: 'bg-amber-500' },
+                { label: 'Agotados', valor: i.agotados, color: 'bg-rose-600' },
+              ] : []}
+            />}
+            {facturasVisibles && <GraficoBarras
+              titulo="Facturación y cartera"
+              formato={pesos}
+              vacio="Aún no hay montos registrados."
+              filas={i.totalFacturado != null && i.carteraPendiente != null ? [
+                { label: 'Total facturado', valor: Number(i.totalFacturado), color: 'bg-indigo-600' },
+                { label: 'Cartera pendiente', valor: Number(i.carteraPendiente), color: 'bg-violet-500' },
+              ] : []}
+            />}
+          </div>
+        </section>}
+
         {(productosVisibles || facturasVisibles) && <section aria-labelledby="actividad-titulo">
           <h3 id="actividad-titulo" className="mb-2 text-base font-semibold text-ink">Actividad reciente</h3>
           <div className="grid items-start gap-4 xl:grid-cols-2">
@@ -116,6 +147,31 @@ export default function Dashboard() {
       </>}
     </div>
   );
+}
+
+function GraficoBarras({ titulo, filas, formato, vacio }: {
+  titulo: string;
+  filas: { label: string; valor: number; color: string }[];
+  formato: Intl.NumberFormat;
+  vacio: string;
+}) {
+  const validas = filas.length > 0 && filas.every(({ valor }) => Number.isFinite(valor) && valor >= 0);
+  const maximo = validas ? Math.max(...filas.map(({ valor }) => valor)) : 0;
+
+  return <figure className="min-w-0">
+    <figcaption className="mb-3 text-sm font-semibold text-ink">{titulo}</figcaption>
+    {maximo > 0 ? <dl className="space-y-3">
+      {filas.map(({ label, valor, color }) => <div key={label}>
+        <div className="flex items-baseline justify-between gap-3 text-sm">
+          <dt className="text-slate-600">{label}</dt>
+          <dd className="shrink-0 font-semibold tabular-nums text-ink">{formato.format(valor)}</dd>
+        </div>
+        <div aria-hidden="true" className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
+          <div className={`h-full rounded-full ${color}`} style={{ width: `${(valor / maximo) * 100}%` }} />
+        </div>
+      </div>)}
+    </dl> : <p className="text-sm text-slate-600">{validas ? vacio : 'No hay datos disponibles para el gráfico.'}</p>}
+  </figure>;
 }
 
 function Actividad({ titulo, enlace, vacio, filas }: {
