@@ -1,7 +1,7 @@
 import Swal from 'sweetalert2';
 
 const base = {
-  confirmButtonColor: '#1f4f82',
+  confirmButtonColor: '#284bc2',
   cancelButtonColor: '#64748b',
   buttonsStyling: true,
 };

@@ -151,10 +151,10 @@ export default function RolesPermisos() {
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           
-          <h1 className="text-3xl font-semibold text-[#253043]">Roles y permisos</h1>
+          <h1 className="text-3xl font-semibold text-[#202a47]">Roles y permisos</h1>
           
         </div>
-        {puedeCrear && <button type="button" onClick={() => { setEditando(null); setForm(formInicial); setMostrar(true); }} className="rounded-xl bg-[#1f4f82] px-5 py-3 text-sm font-semibold text-white">
+        {puedeCrear && <button type="button" onClick={() => { setEditando(null); setForm(formInicial); setMostrar(true); }} className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white">
           + Crear rol
         </button>}
       </div>
@@ -169,7 +169,7 @@ export default function RolesPermisos() {
             <article key={rol.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-[#253043]">{rol.nombre}</h2>
+                  <h2 className="text-lg font-semibold text-[#202a47]">{rol.nombre}</h2>
                   <p className="mt-1 text-sm text-slate-500">{rol.descripcion || 'Sin descripción'}</p>
                 </div>
                 <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${rol.activo ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{rol.activo ? 'ACTIVO' : 'INACTIVO'}</span>
@@ -179,7 +179,7 @@ export default function RolesPermisos() {
                 <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">Permisos</p><p className="mt-1 text-xl font-semibold">{rol.permisos.length}</p></div>
               </div>
               <div className="mt-5 flex flex-wrap gap-2">
-                {puedeEditar && <button type="button" onClick={() => abrirEditar(rol)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#1f4f82]">Editar</button>}
+                {puedeEditar && <button type="button" onClick={() => abrirEditar(rol)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-[#284bc2]">Editar</button>}
                 {(rol.activo ? puedeDesactivar : puedeEditar) && <button type="button" onClick={() => cambiarActivo.mutate(rol)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600">{rol.activo ? 'Desactivar' : 'Activar'}</button>}
                 {puedeEliminar && <button type="button" onClick={() => confirmarEliminar(rol)} className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600">Eliminar</button>}
               </div>
@@ -192,7 +192,7 @@ export default function RolesPermisos() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4">
           <div className="max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4">
-              <div><h2 className="text-xl font-semibold text-[#253043]">{editando ? 'Editar rol' : 'Crear rol'}</h2></div>
+              <div><h2 className="text-xl font-semibold text-[#202a47]">{editando ? 'Editar rol' : 'Crear rol'}</h2></div>
               <button type="button" onClick={cerrar} className="h-9 w-9 rounded-lg text-xl text-slate-400 hover:bg-slate-100">×</button>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); guardar.mutate(); }} className="p-6">
@@ -201,12 +201,12 @@ export default function RolesPermisos() {
                 <label className="text-sm font-medium">Descripción<input value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3" placeholder="Funciones principales del rol" /></label>
               </div>
 
-              <div className="mt-6 flex items-center justify-between"><div><h3 className="font-semibold text-[#253043]">Permisos</h3><p className="text-xs text-slate-500">{form.permisos.length} permiso(s) seleccionado(s)</p></div><button type="button" onClick={() => setForm({ ...form, permisos: form.permisos.length === catalogo.length ? [] : [...catalogo] })} className="text-xs font-semibold text-[#1f4f82]">{form.permisos.length === catalogo.length ? 'Quitar todos' : 'Seleccionar todos'}</button></div>
+              <div className="mt-6 flex items-center justify-between"><div><h3 className="font-semibold text-[#202a47]">Permisos</h3><p className="text-xs text-slate-500">{form.permisos.length} permiso(s) seleccionado(s)</p></div><button type="button" onClick={() => setForm({ ...form, permisos: form.permisos.length === catalogo.length ? [] : [...catalogo] })} className="text-xs font-semibold text-[#284bc2]">{form.permisos.length === catalogo.length ? 'Quitar todos' : 'Seleccionar todos'}</button></div>
 
               <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {grupos.map(([grupo, permisos]) => (
                   <section key={grupo} className="rounded-2xl border border-slate-200 p-4">
-                    <div className="mb-3 flex items-center justify-between"><h4 className="font-semibold text-[#253043]">{nombresGrupo[grupo] ?? grupo}</h4><span className="text-xs text-slate-400">{permisos.filter((p) => form.permisos.includes(p)).length}/{permisos.length}</span></div>
+                    <div className="mb-3 flex items-center justify-between"><h4 className="font-semibold text-[#202a47]">{nombresGrupo[grupo] ?? grupo}</h4><span className="text-xs text-slate-400">{permisos.filter((p) => form.permisos.includes(p)).length}/{permisos.length}</span></div>
                     <div className="space-y-2">
                       {permisos.map((permiso) => (
                         <label key={permiso} className="flex cursor-pointer items-start gap-3 rounded-xl p-2 hover:bg-slate-50">
@@ -219,7 +219,7 @@ export default function RolesPermisos() {
                 ))}
               </div>
 
-              <div className="mt-6 flex justify-end gap-3 border-t pt-5"><button type="button" onClick={cerrar} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold">Cancelar</button><button disabled={guardar.isPending} className="rounded-xl bg-[#1f4f82] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{guardar.isPending ? 'Guardando...' : 'Guardar rol'}</button></div>
+              <div className="mt-6 flex justify-end gap-3 border-t pt-5"><button type="button" onClick={cerrar} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold">Cancelar</button><button disabled={guardar.isPending} className="rounded-xl bg-[#284bc2] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{guardar.isPending ? 'Guardando...' : 'Guardar rol'}</button></div>
             </form>
           </div>
         </div>

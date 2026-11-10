@@ -48,9 +48,9 @@ const COLORES = {
   verde: '#16a36a',
   amarillo: '#d2a200',
   rojo: '#d8545f',
-  azul: '#1f4f82',
+  azul: '#284bc2',
   gris: '#dbe4ee',
-  morado: '#7a48a3',
+  morado: '#6548b6',
 };
 
 export default function Dashboard() {
@@ -88,13 +88,13 @@ export default function Dashboard() {
   if (isError || !data) {
     return (
       <div className="rounded-2xl border border-red-200 bg-white p-6">
-        <h2 className="font-semibold text-[#253043]">
+        <h2 className="font-semibold text-[#202a47]">
           No se pudo cargar la información
         </h2>
         <button
           type="button"
           onClick={() => refetch()}
-          className="mt-4 rounded-xl bg-[#1f4f82] px-4 py-2 text-sm font-semibold text-white"
+          className="mt-4 rounded-xl bg-[#284bc2] px-4 py-2 text-sm font-semibold text-white"
         >
           Reintentar
         </button>
@@ -162,7 +162,7 @@ export default function Dashboard() {
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-[#253043]">
+          <h1 className="text-3xl font-semibold text-[#202a47]">
             Dashboard
           </h1>
         </div>
@@ -385,7 +385,7 @@ function Kpi({
         </p>
         <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
       </div>
-      <p className="mt-2 text-2xl font-semibold text-[#253043]">
+      <p className="mt-2 text-2xl font-semibold text-[#202a47]">
         {value}
       </p>
       <p className="mt-1 text-xs text-slate-500">{note}</p>
@@ -404,7 +404,7 @@ function ChartPanel({
 }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="font-semibold text-[#253043]">{title}</h2>
+      <h2 className="font-semibold text-[#202a47]">{title}</h2>
       <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
       <div className="mt-3">{children}</div>
     </section>
@@ -421,7 +421,7 @@ function Mini({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-[#253043]">
+      <p className="mt-1 text-xl font-semibold text-[#202a47]">
         {value}
       </p>
     </div>
@@ -446,10 +446,10 @@ function Listado({
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-semibold text-[#253043]">{title}</h2>
+        <h2 className="font-semibold text-[#202a47]">{title}</h2>
         <Link
           to={to}
-          className="text-sm font-semibold text-[#1f4f82]"
+          className="text-sm font-semibold text-[#284bc2]"
         >
           Ver todo
         </Link>
@@ -467,7 +467,7 @@ function Listado({
               className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 px-4 py-3"
             >
               <div className="min-w-0">
-                <p className="truncate font-semibold text-[#253043]">
+                <p className="truncate font-semibold text-[#202a47]">
                   {item.title}
                 </p>
                 <p className="truncate text-xs text-slate-500">
@@ -495,7 +495,7 @@ function Quick({
   return (
     <Link
       to={to}
-      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-[#1f4f82] hover:bg-slate-50"
+      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-[#284bc2] hover:bg-slate-50"
     >
       {label}
     </Link>

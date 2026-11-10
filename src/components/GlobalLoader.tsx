@@ -15,11 +15,11 @@ export default function GlobalLoader() {
     >
       <div className="flex min-w-[180px] flex-col items-center rounded-2xl border border-slate-200 bg-white px-7 py-6 shadow-2xl">
         <div className="sigifac-spinner" />
-        <p className="mt-4 text-sm font-semibold text-[#253043]">
+        <p className="mt-4 text-sm font-semibold text-[#202a47]">
           Procesando
         </p>
         <p className="mt-1 text-xs text-slate-500">
-          SIGIFAC está actualizando la información
+          Sertiva está actualizando la información
         </p>
       </div>
     </div>

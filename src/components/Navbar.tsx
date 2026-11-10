@@ -155,7 +155,7 @@ export default function Navbar() {
     <nav className="border-b border-slate-200 relative">
       <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <span className="font-display text-lg text-ink">SIGIFAC</span>
+          <span className="font-display text-lg text-ink">Sertiva</span>
 
           {/* Links — visibles desde tablet en adelante */}
           <div className="hidden md:flex gap-2">

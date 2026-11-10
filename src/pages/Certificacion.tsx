@@ -762,7 +762,7 @@ export default function Certificacion() {
     <div className="mx-auto max-w-7xl space-y-6">
       <header>
 
-        <h1 className="text-3xl font-semibold text-[#253043]">
+        <h1 className="text-3xl font-semibold text-[#202a47]">
           Certificación
         </h1>
 
@@ -770,7 +770,7 @@ export default function Certificacion() {
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.25fr_.75fr]">
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="font-semibold text-[#253043]">
+          <h2 className="font-semibold text-[#202a47]">
             1. ¿Qué deseas certificar?
           </h2>
 
@@ -796,7 +796,7 @@ export default function Certificacion() {
                   }}
                   className={`rounded-xl border p-3 text-sm font-semibold ${
                     tipo === t
-                      ? 'border-[#1f5c94] bg-[#edf4ff] text-[#1f5c94]'
+                      ? 'border-[#284bc2] bg-[#edf1ff] text-[#284bc2]'
                       : 'border-slate-200 text-slate-600'
                   }`}
                 >
@@ -917,7 +917,7 @@ export default function Certificacion() {
                         />
 
                         <div>
-                          <p className="font-semibold text-[#253043]">
+                          <p className="font-semibold text-[#202a47]">
                             {
                               p.nombre
                             }
@@ -1060,7 +1060,7 @@ export default function Certificacion() {
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="font-semibold text-[#253043]">
+          <h2 className="font-semibold text-[#202a47]">
             2. Destinatario y firma
           </h2>
 
@@ -1085,7 +1085,7 @@ export default function Certificacion() {
                   }}
                   className={`rounded-xl border p-3 text-sm font-semibold ${
                     uso === u
-                      ? 'border-[#7a48a3] bg-[#fbf8ff] text-[#7a48a3]'
+                      ? 'border-[#6548b6] bg-[#fbf8ff] text-[#6548b6]'
                       : 'border-slate-200 text-slate-600'
                   }`}
                 >
@@ -1212,7 +1212,7 @@ export default function Certificacion() {
               !destinoValido ||
               crear.isPending
             }
-            className="mt-5 w-full rounded-xl bg-[#1f5c94] px-5 py-3 font-semibold text-white disabled:opacity-50"
+            className="mt-5 w-full rounded-xl bg-[#284bc2] px-5 py-3 font-semibold text-white disabled:opacity-50"
           >
             {crear.isPending
               ? 'Enviando...'
@@ -1222,7 +1222,7 @@ export default function Certificacion() {
       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-[#253043]">
+        <h2 className="font-semibold text-[#202a47]">
           Historial
         </h2>
 
@@ -1306,14 +1306,14 @@ export default function Certificacion() {
                             href={`${API_BASE_URL}/certificacion/certificado/${s.documentoCertificado.codigoVerificacion ?? s.documentoCertificado.codigoQr}/pdf`}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#1f5c94]"
+                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#284bc2]"
                           >
                             Ver PDF
                           </a>
 
                           <a
                             href={`${API_BASE_URL}/certificacion/certificado/${s.documentoCertificado.codigoVerificacion ?? s.documentoCertificado.codigoQr}/descargar`}
-                            className="rounded-lg bg-[#1f5c94] px-3 py-1.5 text-xs font-semibold text-white"
+                            className="rounded-lg bg-[#284bc2] px-3 py-1.5 text-xs font-semibold text-white"
                           >
                             Descargar
                           </a>
@@ -1322,7 +1322,7 @@ export default function Certificacion() {
                             href={`${window.location.origin}/verificar-certificado/${s.documentoCertificado.codigoVerificacion ?? s.documentoCertificado.codigoQr}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded-lg border border-[#1f5c94] px-3 py-1.5 text-xs font-semibold text-[#1f5c94]"
+                            className="rounded-lg border border-[#284bc2] px-3 py-1.5 text-xs font-semibold text-[#284bc2]"
                           >
                             Verificar
                           </a>
@@ -1330,7 +1330,7 @@ export default function Certificacion() {
                             href={`${API_BASE_URL}/certificacion/certificado/${s.documentoCertificado.codigoVerificacion ?? s.documentoCertificado.codigoQr}/qr.png`}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#1f5c94]"
+                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#284bc2]"
                           >
                             Ver QR
                           </a>
@@ -1338,7 +1338,7 @@ export default function Certificacion() {
                             tienePermiso(usuario, 'NOTIFICACIONES_ENVIAR') && (
                               <Link
                                 to={`/notificaciones?certificado=${encodeURIComponent(s.documentoCertificado.codigoVerificacion ?? s.documentoCertificado.codigoQr)}`}
-                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#1f5c94]"
+                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#284bc2]"
                               >
                                 Enviar por correo
                               </Link>

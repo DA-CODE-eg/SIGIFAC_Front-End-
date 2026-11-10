@@ -597,7 +597,7 @@ export default function Notificaciones() {
     <div className="mx-auto max-w-7xl space-y-6">
       <header>
 
-        <h1 className="text-3xl font-semibold text-[#253043]">
+        <h1 className="text-3xl font-semibold text-[#202a47]">
           Notificaciones
         </h1>
 
@@ -611,7 +611,7 @@ export default function Notificaciones() {
           }
           className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${
             tab === 'MENSAJE'
-              ? 'bg-[#1f5c94] text-white'
+              ? 'bg-[#284bc2] text-white'
               : 'text-slate-600 hover:bg-slate-50'
           }`}
         >
@@ -625,7 +625,7 @@ export default function Notificaciones() {
           }
           className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${
             tab === 'ENVIAR'
-              ? 'bg-[#1f5c94] text-white'
+              ? 'bg-[#284bc2] text-white'
               : 'text-slate-600 hover:bg-slate-50'
           }`}
         >
@@ -639,7 +639,7 @@ export default function Notificaciones() {
           }
           className={`rounded-xl px-5 py-2.5 text-sm font-semibold ${
             tab === 'ALERTAS'
-              ? 'bg-[#1f5c94] text-white'
+              ? 'bg-[#284bc2] text-white'
               : 'text-slate-600 hover:bg-slate-50'
           }`}
         >
@@ -656,7 +656,7 @@ export default function Notificaciones() {
       {tab === 'MENSAJE' && (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[.9fr_1.1fr]">
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="font-semibold text-[#253043]">
+            <h2 className="font-semibold text-[#202a47]">
               1. Destinatario
             </h2>
 
@@ -684,7 +684,7 @@ export default function Notificaciones() {
                     }}
                     className={`rounded-xl border px-3 py-3 text-xs font-semibold ${
                       canalMensaje === canal
-                        ? 'border-[#1f5c94] bg-[#edf4ff] text-[#1f5c94]'
+                        ? 'border-[#284bc2] bg-[#edf1ff] text-[#284bc2]'
                         : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                     }`}
                   >
@@ -709,7 +709,7 @@ export default function Notificaciones() {
                 className={`rounded-lg px-3 py-2 text-xs font-semibold ${
                   modoDestinatario ===
                   'BUSCAR'
-                    ? 'bg-[#edf4ff] text-[#1f5c94]'
+                    ? 'bg-[#edf1ff] text-[#284bc2]'
                     : 'bg-slate-50 text-slate-500'
                 }`}
               >
@@ -726,7 +726,7 @@ export default function Notificaciones() {
                 className={`rounded-lg px-3 py-2 text-xs font-semibold ${
                   modoDestinatario ===
                   'MANUAL'
-                    ? 'bg-[#edf4ff] text-[#1f5c94]'
+                    ? 'bg-[#edf1ff] text-[#284bc2]'
                     : 'bg-slate-50 text-slate-500'
                 }`}
               >
@@ -768,7 +768,7 @@ export default function Notificaciones() {
                       className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
                         tipoContacto ===
                         tipo
-                          ? 'border-[#1f5c94] text-[#1f5c94]'
+                          ? 'border-[#284bc2] text-[#284bc2]'
                           : 'border-slate-200 text-slate-500'
                       }`}
                     >
@@ -783,7 +783,7 @@ export default function Notificaciones() {
                 {contactoSeleccionado ? (
                   <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                     <div>
-                      <p className="font-semibold text-[#253043]">
+                      <p className="font-semibold text-[#202a47]">
                         {
                           contactoSeleccionado.nombreRazonSocial
                         }
@@ -807,7 +807,7 @@ export default function Notificaciones() {
                           '',
                         );
                       }}
-                      className="text-sm font-semibold text-[#1f5c94]"
+                      className="text-sm font-semibold text-[#284bc2]"
                     >
                       Cambiar
                     </button>
@@ -866,7 +866,7 @@ export default function Notificaciones() {
                                 }
                                 className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50"
                               >
-                                <p className="text-sm font-semibold text-[#253043]">
+                                <p className="text-sm font-semibold text-[#202a47]">
                                   {
                                     item.nombreRazonSocial
                                   }
@@ -925,7 +925,7 @@ export default function Notificaciones() {
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="font-semibold text-[#253043]">
+            <h2 className="font-semibold text-[#202a47]">
               2. Escribe el mensaje
             </h2>
 
@@ -966,7 +966,7 @@ export default function Notificaciones() {
               disabled={
                 enviarMensaje.isPending
               }
-              className="mt-5 w-full rounded-xl bg-[#1f5c94] px-5 py-3 font-semibold text-white disabled:opacity-50"
+              className="mt-5 w-full rounded-xl bg-[#284bc2] px-5 py-3 font-semibold text-white disabled:opacity-50"
             >
               {enviarMensaje.isPending
                 ? 'Enviando...'
@@ -985,7 +985,7 @@ export default function Notificaciones() {
       {tab === 'ENVIAR' && (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.05fr_.95fr]">
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="font-semibold text-[#253043]">
+            <h2 className="font-semibold text-[#202a47]">
               1. Selecciona el certificado
             </h2>
 
@@ -1072,14 +1072,14 @@ export default function Notificaciones() {
                   onClick={
                     usarDestinatarioOriginal
                   }
-                  className="mt-4 text-sm font-semibold text-[#1f5c94]"
+                  className="mt-4 text-sm font-semibold text-[#284bc2]"
                 >
                   Usar destinatario original
                 </button>
               </div>
             )}
 
-            <h2 className="mt-6 font-semibold text-[#253043]">
+            <h2 className="mt-6 font-semibold text-[#202a47]">
               2. Canal y destinatario
             </h2>
 
@@ -1106,7 +1106,7 @@ export default function Notificaciones() {
                   }}
                   className={`rounded-xl border px-3 py-3 text-xs font-semibold ${
                     canalCertificado === canal
-                      ? 'border-[#1f5c94] bg-[#edf4ff] text-[#1f5c94]'
+                      ? 'border-[#284bc2] bg-[#edf1ff] text-[#284bc2]'
                       : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                   }`}
                 >
@@ -1130,7 +1130,7 @@ export default function Notificaciones() {
                 className={`rounded-lg px-3 py-2 text-xs font-semibold ${
                   modoDestinatario ===
                   'BUSCAR'
-                    ? 'bg-[#edf4ff] text-[#1f5c94]'
+                    ? 'bg-[#edf1ff] text-[#284bc2]'
                     : 'bg-slate-50 text-slate-500'
                 }`}
               >
@@ -1147,7 +1147,7 @@ export default function Notificaciones() {
                 className={`rounded-lg px-3 py-2 text-xs font-semibold ${
                   modoDestinatario ===
                   'MANUAL'
-                    ? 'bg-[#edf4ff] text-[#1f5c94]'
+                    ? 'bg-[#edf1ff] text-[#284bc2]'
                     : 'bg-slate-50 text-slate-500'
                 }`}
               >
@@ -1189,7 +1189,7 @@ export default function Notificaciones() {
                       className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
                         tipoContacto ===
                         tipo
-                          ? 'border-[#1f5c94] text-[#1f5c94]'
+                          ? 'border-[#284bc2] text-[#284bc2]'
                           : 'border-slate-200 text-slate-500'
                       }`}
                     >
@@ -1204,7 +1204,7 @@ export default function Notificaciones() {
                 {contactoSeleccionado ? (
                   <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                     <div>
-                      <p className="font-semibold text-[#253043]">
+                      <p className="font-semibold text-[#202a47]">
                         {
                           contactoSeleccionado.nombreRazonSocial
                         }
@@ -1228,7 +1228,7 @@ export default function Notificaciones() {
                           '',
                         );
                       }}
-                      className="text-sm font-semibold text-[#1f5c94]"
+                      className="text-sm font-semibold text-[#284bc2]"
                     >
                       Cambiar
                     </button>
@@ -1295,7 +1295,7 @@ export default function Notificaciones() {
                                 }
                                 className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50"
                               >
-                                <p className="text-sm font-semibold text-[#253043]">
+                                <p className="text-sm font-semibold text-[#202a47]">
                                   {
                                     item.nombreRazonSocial
                                   }
@@ -1358,7 +1358,7 @@ export default function Notificaciones() {
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="font-semibold text-[#253043]">
+            <h2 className="font-semibold text-[#202a47]">
               3. Mensaje
             </h2>
 
@@ -1432,7 +1432,7 @@ export default function Notificaciones() {
               disabled={
                 enviar.isPending
               }
-              className="mt-5 w-full rounded-xl bg-[#1f5c94] px-5 py-3 font-semibold text-white disabled:opacity-50"
+              className="mt-5 w-full rounded-xl bg-[#284bc2] px-5 py-3 font-semibold text-white disabled:opacity-50"
             >
               {enviar.isPending
                 ? 'Enviando...'
@@ -1452,7 +1452,7 @@ export default function Notificaciones() {
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-semibold text-[#253043]">
+              <h2 className="font-semibold text-[#202a47]">
                 Historial y alertas
               </h2>
               <p className="mt-1 text-sm text-slate-500">
@@ -1488,7 +1488,7 @@ export default function Notificaciones() {
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm font-semibold text-[#253043]">
+                            <span className="text-sm font-semibold text-[#202a47]">
                               {
                                 item.tipo
                               }
@@ -1496,7 +1496,7 @@ export default function Notificaciones() {
 
                             {item.tipo ===
                               'REENVIO_CERTIFICADO' && (
-                              <span className="rounded-full bg-[#edf4ff] px-2 py-0.5 text-[10px] font-semibold text-[#1f5c94]">
+                              <span className="rounded-full bg-[#edf1ff] px-2 py-0.5 text-[10px] font-semibold text-[#284bc2]">
                                 CERTIFICADO
                               </span>
                             )}
@@ -1525,7 +1525,7 @@ export default function Notificaciones() {
                                 item.id,
                               )
                             }
-                            className="whitespace-nowrap text-xs font-semibold text-[#1f5c94]"
+                            className="whitespace-nowrap text-xs font-semibold text-[#284bc2]"
                           >
                             Marcar leída
                           </button>
@@ -1554,7 +1554,7 @@ function Dato({
       <p className="text-xs uppercase tracking-wide text-slate-400">
         {label}
       </p>
-      <p className="mt-1 break-words text-sm font-semibold text-[#253043]">
+      <p className="mt-1 break-words text-sm font-semibold text-[#202a47]">
         {value}
       </p>
     </div>

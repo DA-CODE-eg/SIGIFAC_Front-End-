@@ -16,7 +16,7 @@ export default function Verificar() {
   return (
     <div className="min-h-screen bg-paper flex items-center justify-center p-6">
       <div className="w-full max-w-sm border rounded-lg p-6 text-center">
-        <span className="font-display text-xl text-ink block mb-6">SIGIFAC</span>
+        <span className="font-display text-xl text-ink block mb-6">Sertiva</span>
 
         {error && <p className="text-red-600">{error}</p>}
 

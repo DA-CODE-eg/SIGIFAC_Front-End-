@@ -169,13 +169,13 @@ export default function Productos() {
     <div className="max-w-7xl mx-auto">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-[#253043]">Productos</h1>
+          <h1 className="text-3xl font-semibold text-[#202a47]">Productos</h1>
         </div>
 
         <button
           type="button"
           onClick={() => window.location.assign('/inventario')}
-          className="rounded-xl bg-[#1f4f82] px-5 py-3 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white"
         >
           + Crear desde Inventario
         </button>
@@ -194,7 +194,7 @@ export default function Productos() {
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           placeholder="Buscar producto, código, referencia o categoría..."
-          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#1f4f82]"
+          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#284bc2]"
         />
 
         <select
@@ -234,7 +234,7 @@ export default function Productos() {
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="font-semibold text-[#253043]">Catálogo de productos</h2>
+          <h2 className="font-semibold text-[#202a47]">Catálogo de productos</h2>
           <p className="mt-1 text-xs text-slate-500">{filtrados.length} resultado(s)</p>
         </div>
 
@@ -264,7 +264,7 @@ export default function Productos() {
               <tbody>
                 {filtrados.map((p) => (
                   <tr key={p.registroId} className="border-t border-slate-100 hover:bg-slate-50/60">
-                    <td className="px-4 py-3 font-semibold text-[#253043]">
+                    <td className="px-4 py-3 font-semibold text-[#202a47]">
                       {p.nombre}<span className="block font-mono text-xs font-normal text-slate-500">PRD-{p.registroId}</span>
                     </td>
                     <td className="px-4 py-3">{p.referencia || '—'}</td>
@@ -308,7 +308,7 @@ export default function Productos() {
                           type="button"
                           disabled={!p.activo}
                           onClick={() => window.location.assign(`/facturas?registroId=${p.registroId}`)}
-                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#1f4f82] disabled:opacity-40"
+                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#284bc2] disabled:opacity-40"
                         >
                           Facturar
                         </button>
@@ -316,7 +316,7 @@ export default function Productos() {
                           type="button"
                           disabled={!p.activo}
                           onClick={() => window.location.assign(`/certificacion?registroId=${p.registroId}`)}
-                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#7a48a3] disabled:opacity-40"
+                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#6548b6] disabled:opacity-40"
                         >
                           Certificar
                         </button>
@@ -350,7 +350,7 @@ export default function Productos() {
                 )
                 .map(([key, value]) => (
                   <div key={key}>
-                    <label className="mb-1.5 block text-sm font-medium text-[#253043]">
+                    <label className="mb-1.5 block text-sm font-medium text-[#202a47]">
                       {etiquetaCampo(key)}
                     </label>
                     <input
@@ -394,7 +394,7 @@ export default function Productos() {
               </button>
               <button
                 disabled={actualizar.isPending}
-                className="rounded-xl bg-[#1f4f82] px-5 py-2.5 font-semibold text-white disabled:opacity-50"
+                className="rounded-xl bg-[#284bc2] px-5 py-2.5 font-semibold text-white disabled:opacity-50"
               >
                 {actualizar.isPending ? 'Guardando...' : 'Guardar cambios'}
               </button>
@@ -410,7 +410,7 @@ function Kpi({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-[#253043]">{value}</p>
+      <p className="mt-2 text-2xl font-semibold text-[#202a47]">{value}</p>
     </div>
   );
 }
@@ -447,7 +447,7 @@ function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
-          <h2 className="text-xl font-semibold text-[#253043]">{title}</h2>
+          <h2 className="text-xl font-semibold text-[#202a47]">{title}</h2>
           <button type="button" onClick={onClose} className="h-9 w-9 rounded-lg text-xl text-slate-400 hover:bg-slate-100">
             ×
           </button>

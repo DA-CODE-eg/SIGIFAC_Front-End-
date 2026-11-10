@@ -127,7 +127,7 @@ export default function CertificarPublico() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-[#f3f6fa] p-8 text-slate-500">
+      <div className="min-h-screen bg-[#f5f7fc] p-8 text-slate-500">
         Cargando documento...
       </div>
     );
@@ -159,15 +159,15 @@ export default function CertificarPublico() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f6fa] px-4 py-8 md:py-12">
+    <div className="min-h-screen bg-[#f5f7fc] px-4 py-8 md:py-12">
       <main className="mx-auto max-w-5xl">
         <header className="mb-5 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-[#1f5c94]">
-                SIGIFAC · documento para firma
+              <p className="text-xs uppercase tracking-[0.18em] text-[#284bc2]">
+                Sertiva · documento para firma
               </p>
-              <h1 className="mt-1 text-2xl font-semibold text-[#253043]">
+              <h1 className="mt-1 text-2xl font-semibold text-[#202a47]">
                 {data.empresa}
               </h1>
               <p className="mt-1 text-sm text-slate-500">
@@ -186,7 +186,7 @@ export default function CertificarPublico() {
               <p className="text-xs uppercase tracking-[0.16em] text-slate-500">
                 Revisión del contenido
               </p>
-              <h2 className="mt-1 text-xl font-semibold text-[#253043]">
+              <h2 className="mt-1 text-xl font-semibold text-[#202a47]">
                 Documento enviado para tu revisión
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -245,7 +245,7 @@ export default function CertificarPublico() {
                 onClick={() =>
                   enviarOtp.mutate()
                 }
-                className="rounded-xl bg-[#1f5c94] px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                className="rounded-xl bg-[#284bc2] px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
                 Firmar documento
               </button>
@@ -255,11 +255,11 @@ export default function CertificarPublico() {
 
         {paso === 'OTP' && (
           <section className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.16em] text-[#1f5c94]">
+            <p className="text-xs uppercase tracking-[0.16em] text-[#284bc2]">
               Validación de correo
             </p>
 
-            <h2 className="mt-2 text-2xl font-semibold text-[#253043]">
+            <h2 className="mt-2 text-2xl font-semibold text-[#202a47]">
               Revisa tu correo
             </h2>
 
@@ -297,7 +297,7 @@ export default function CertificarPublico() {
               onClick={() =>
                 validarOtp.mutate()
               }
-              className="mt-4 w-full rounded-xl bg-[#1f5c94] px-5 py-3 font-semibold text-white disabled:opacity-50"
+              className="mt-4 w-full rounded-xl bg-[#284bc2] px-5 py-3 font-semibold text-white disabled:opacity-50"
             >
               Validar código
             </button>
@@ -311,12 +311,12 @@ export default function CertificarPublico() {
               Correo validado
             </div>
 
-            <h2 className="text-2xl font-semibold text-[#253043]">
+            <h2 className="text-2xl font-semibold text-[#202a47]">
               Completa tu identificación
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              SIGIFAC comparará estos datos con la identificación esperada registrada para el destinatario del documento.
+              Sertiva comparará estos datos con la identificación esperada registrada para el destinatario del documento.
             </p>
 
             <div className="mt-6 space-y-4">
@@ -433,7 +433,7 @@ function TablaContenido({
                 }
                 className="border-t border-slate-100"
               >
-                <td className="px-4 py-3 font-semibold text-[#253043]">
+                <td className="px-4 py-3 font-semibold text-[#202a47]">
                   {item.nombreProducto ??
                     item.nombre ??
                     item.producto ??
@@ -569,7 +569,7 @@ function Finalizado({
         ✓
       </div>
 
-      <h2 className="mt-4 text-2xl font-semibold text-[#253043]">
+      <h2 className="mt-4 text-2xl font-semibold text-[#202a47]">
         Documento firmado y sellado
       </h2>
 
@@ -577,7 +577,7 @@ function Finalizado({
         El proceso solicitado por {empresa} fue completado. También recibirás un correo con el certificado final y su enlace de verificación.
       </p>
 
-      <p className="mt-4 text-sm font-semibold text-[#1f5c94]">
+      <p className="mt-4 text-sm font-semibold text-[#284bc2]">
         {resultado.codigoVerificacion}
       </p>
 
@@ -586,7 +586,7 @@ function Finalizado({
           href={
             resultado.urlVerificacion
           }
-          className="rounded-xl bg-[#1f5c94] px-5 py-3 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white"
         >
           Ver certificado
         </a>
@@ -597,7 +597,7 @@ function Finalizado({
           }
           target="_blank"
           rel="noreferrer"
-          className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-[#1f5c94]"
+          className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-[#284bc2]"
         >
           Abrir PDF firmado
         </a>
@@ -621,7 +621,7 @@ function EstadoPaso({
           : 'Firmado';
 
   return (
-    <span className="rounded-full bg-[#edf4ff] px-3 py-1.5 text-xs font-semibold text-[#1f5c94]">
+    <span className="rounded-full bg-[#edf1ff] px-3 py-1.5 text-xs font-semibold text-[#284bc2]">
       {label}
     </span>
   );
@@ -640,7 +640,7 @@ function Input({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium text-[#253043]">
+      <label className="mb-1.5 block text-sm font-medium text-[#202a47]">
         {label}
       </label>
       <input
@@ -669,7 +669,7 @@ function Fila({
     <div
       className={`flex justify-between gap-4 py-1 text-sm ${
         strong
-          ? 'font-semibold text-[#253043]'
+          ? 'font-semibold text-[#202a47]'
           : 'text-slate-600'
       }`}
     >

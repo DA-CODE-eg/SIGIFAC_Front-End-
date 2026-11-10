@@ -599,7 +599,7 @@ export default function Facturas() {
         ).toString();
 
       return [
-        `SIGIFAC ${numero}.`,
+        `Sertiva ${numero}.`,
         `Saldo ${saldoPlano} COP.`,
         `Pagar: ${checkoutUrlPago}`,
       ].join(' ');
@@ -636,7 +636,7 @@ export default function Facturas() {
         'Puedes realizar el pago de forma segura aquí:',
         checkoutUrlPago,
         '',
-        'SIGIFAC',
+        'Sertiva',
       ]
         .filter(
           (linea) =>
@@ -678,7 +678,7 @@ export default function Facturas() {
       '',
       'Este enlace te llevará directamente al checkout seguro de Mercado Pago.',
       '',
-      'SIGIFAC',
+      'Sertiva',
     ]
       .filter(
         (linea) =>
@@ -1080,7 +1080,7 @@ export default function Facturas() {
       const respuesta =
         await feedback.confirmar(
           '¿Anular factura?',
-          'SIGIFAC devolverá las unidades al inventario. No se puede anular una factura con pagos aprobados.',
+          'Sertiva devolverá las unidades al inventario. No se puede anular una factura con pagos aprobados.',
           'Anular factura',
         );
 
@@ -1103,7 +1103,7 @@ export default function Facturas() {
     <div className="mx-auto max-w-7xl space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-[#253043]">
+          <h1 className="text-3xl font-semibold text-[#202a47]">
             Facturación
           </h1>
         </div>
@@ -1113,7 +1113,7 @@ export default function Facturas() {
           onClick={() =>
             setMostrarNueva(true)
           }
-          className="rounded-xl bg-[#1f4f82] px-5 py-3 text-sm font-semibold text-white shadow-sm"
+          className="rounded-xl bg-[#284bc2] px-5 py-3 text-sm font-semibold text-white shadow-sm"
         >
           + Crear factura
         </button>
@@ -1202,7 +1202,7 @@ export default function Facturas() {
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="font-semibold text-[#253043]">
+          <h2 className="font-semibold text-[#202a47]">
             Facturas
           </h2>
           <p className="mt-1 text-xs text-slate-500">
@@ -1255,7 +1255,7 @@ export default function Facturas() {
                       key={factura.id}
                       className="border-t border-slate-100"
                     >
-                      <td className="px-4 py-3 font-semibold text-[#253043]">
+                      <td className="px-4 py-3 font-semibold text-[#202a47]">
                         {factura.numeroFactura ??
                           `#${factura.id}`}
                       </td>
@@ -1347,7 +1347,7 @@ export default function Facturas() {
                                     factura,
                                   )
                                 }
-                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#1f4f82] disabled:opacity-50"
+                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#284bc2] disabled:opacity-50"
                               >
                                 {cargandoLinkPago
                                   ? 'Generando...'
@@ -1454,7 +1454,7 @@ export default function Facturas() {
                               }
                               className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50"
                             >
-                              <p className="text-sm font-semibold text-[#253043]">
+                              <p className="text-sm font-semibold text-[#202a47]">
                                 {
                                   cliente.nombreRazonSocial
                                 }
@@ -1509,7 +1509,7 @@ export default function Facturas() {
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="text-sm font-semibold text-[#253043]">
+                              <p className="text-sm font-semibold text-[#202a47]">
                                 {
                                   producto.nombre
                                 }
@@ -1597,7 +1597,7 @@ export default function Facturas() {
                             className="border-t border-slate-100"
                           >
                             <td className="px-3 py-3">
-                              <p className="font-semibold text-[#253043]">
+                              <p className="font-semibold text-[#202a47]">
                                 {
                                   item.nombre
                                 }
@@ -1766,7 +1766,7 @@ export default function Facturas() {
                   <p className="text-xs uppercase tracking-wide text-slate-500">
                     Total factura
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-[#253043]">
+                  <p className="mt-2 text-3xl font-semibold text-[#202a47]">
                     {moneda(
                       totalFactura,
                     )}
@@ -1813,7 +1813,7 @@ export default function Facturas() {
                   onClick={
                     confirmarCrearFactura
                   }
-                  className="rounded-xl bg-[#1f4f82] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                  className="rounded-xl bg-[#284bc2] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {crearFactura.isPending
                     ? 'Creando...'
@@ -1870,7 +1870,7 @@ export default function Facturas() {
               />
             </div>
 
-            <h3 className="mt-6 font-semibold text-[#253043]">
+            <h3 className="mt-6 font-semibold text-[#202a47]">
               Productos facturados
             </h3>
 
@@ -1953,7 +1953,7 @@ export default function Facturas() {
               </table>
             </div>
 
-            <h3 className="mt-6 font-semibold text-[#253043]">
+            <h3 className="mt-6 font-semibold text-[#202a47]">
               Pagos
             </h3>
 
@@ -2007,13 +2007,13 @@ export default function Facturas() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.25fr_.75fr]">
             <div>
               <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#1f4f82]">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#284bc2]">
                   Solicitud de pago
                 </p>
 
                 <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-[#253043]">
+                    <h3 className="text-xl font-semibold text-[#202a47]">
                       {facturaLinkPago.numeroFactura ??
                         `Factura #${facturaLinkPago.id}`}
                     </h3>
@@ -2026,7 +2026,7 @@ export default function Facturas() {
                     <p className="text-xs uppercase text-slate-500">
                       Saldo a pagar
                     </p>
-                    <p className="text-2xl font-bold text-[#1f4f82]">
+                    <p className="text-2xl font-bold text-[#284bc2]">
                       {moneda(
                         Number(
                           facturaLinkPago.saldoPendiente ??
@@ -2038,7 +2038,7 @@ export default function Facturas() {
                 </div>
               </div>
 
-              <h3 className="mt-6 font-semibold text-[#253043]">
+              <h3 className="mt-6 font-semibold text-[#202a47]">
                 Detalle que recibirá el cliente
               </h3>
 
@@ -2063,7 +2063,7 @@ export default function Facturas() {
                           className="border-t border-slate-100"
                         >
                           <td className="px-3 py-3">
-                            <p className="font-semibold text-[#253043]">
+                            <p className="font-semibold text-[#202a47]">
                               {item.nombreProducto}
                             </p>
                             {item.referencia && (
@@ -2149,7 +2149,7 @@ export default function Facturas() {
                       <span>{moneda(resumen.total)}</span>
                     </div>
 
-                    <div className="mt-2 flex justify-between rounded-lg bg-[#1f4f82] px-3 py-2 font-semibold text-white">
+                    <div className="mt-2 flex justify-between rounded-lg bg-[#284bc2] px-3 py-2 font-semibold text-white">
                       <span>Saldo a pagar</span>
                       <span>{moneda(resumen.saldo)}</span>
                     </div>
@@ -2179,7 +2179,7 @@ export default function Facturas() {
                     }
                     className={`rounded-xl border px-3 py-3 text-xs font-semibold ${
                       canalPago === canal
-                        ? 'border-[#1f4f82] bg-blue-50 text-[#1f4f82]'
+                        ? 'border-[#284bc2] bg-blue-50 text-[#284bc2]'
                         : 'border-slate-200 text-slate-500'
                     }`}
                   >
@@ -2197,7 +2197,7 @@ export default function Facturas() {
                   Destinatario
                 </p>
 
-                <p className="mt-1 font-semibold text-[#253043]">
+                <p className="mt-1 font-semibold text-[#202a47]">
                   {facturaLinkPago.clienteNombre}
                 </p>
 
@@ -2207,7 +2207,7 @@ export default function Facturas() {
                       <p className="text-xs uppercase text-slate-500">
                         Correo registrado
                       </p>
-                      <p className="mt-1 text-sm font-medium text-[#253043]">
+                      <p className="mt-1 text-sm font-medium text-[#202a47]">
                         {facturaLinkPago.cliente?.correo ||
                           'Sin correo registrado'}
                       </p>
@@ -2222,7 +2222,7 @@ export default function Facturas() {
                         }}
                         className={`rounded-xl border px-3 py-2 text-xs font-semibold ${
                           usarCorreoRegistrado
-                            ? 'border-[#1f4f82] bg-blue-50 text-[#1f4f82]'
+                            ? 'border-[#284bc2] bg-blue-50 text-[#284bc2]'
                             : 'border-slate-200 text-slate-500'
                         }`}
                       >
@@ -2236,7 +2236,7 @@ export default function Facturas() {
                         }
                         className={`rounded-xl border px-3 py-2 text-xs font-semibold ${
                           !usarCorreoRegistrado
-                            ? 'border-[#1f4f82] bg-blue-50 text-[#1f4f82]'
+                            ? 'border-[#284bc2] bg-blue-50 text-[#284bc2]'
                             : 'border-slate-200 text-slate-500'
                         }`}
                       >
@@ -2258,7 +2258,7 @@ export default function Facturas() {
                             )
                           }
                           placeholder="correo@dominio.com"
-                          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#1f4f82]"
+                          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#284bc2]"
                         />
                         <p className="mt-1 text-[11px] leading-4 text-slate-400">
                           La solicitud se enviará únicamente a este correo.
@@ -2288,14 +2288,14 @@ export default function Facturas() {
               </div>
 
               <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs leading-5 text-emerald-800">
-                SIGIFAC enviará directamente el detalle de la factura, IVA, saldo y enlace seguro de Mercado Pago por el canal seleccionado.
+                Sertiva enviará directamente el detalle de la factura, IVA, saldo y enlace seguro de Mercado Pago por el canal seleccionado.
               </div>
 
               <button
                 type="button"
                 disabled={enviandoSolicitudPago}
                 onClick={enviarSolicitudPago}
-                className="mt-5 w-full rounded-xl bg-[#1f4f82] px-5 py-3 font-semibold text-white disabled:opacity-50"
+                className="mt-5 w-full rounded-xl bg-[#284bc2] px-5 py-3 font-semibold text-white disabled:opacity-50"
               >
                 {enviandoSolicitudPago
                   ? 'Preparando envío...'
@@ -2420,7 +2420,7 @@ export default function Facturas() {
               disabled={
                 registrarPago.isPending
               }
-              className="rounded-xl bg-[#1f4f82] px-5 py-2.5 font-semibold text-white"
+              className="rounded-xl bg-[#284bc2] px-5 py-2.5 font-semibold text-white"
             >
               Registrar pago
             </button>
@@ -2515,7 +2515,7 @@ function Kpi({
       <p className="text-xs uppercase tracking-wide text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold text-[#253043]">
+      <p className="mt-2 text-2xl font-semibold text-[#202a47]">
         {value}
       </p>
     </div>
@@ -2564,7 +2564,7 @@ function Modal({
         className={`max-h-[92vh] w-full ${size} overflow-y-auto rounded-2xl bg-white shadow-2xl`}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
-          <h2 className="text-xl font-semibold text-[#253043]">
+          <h2 className="text-xl font-semibold text-[#202a47]">
             {title}
           </h2>
 
@@ -2625,7 +2625,7 @@ function Dato({
       <p className="text-xs uppercase text-slate-500">
         {label}
       </p>
-      <p className="mt-1 font-semibold text-[#253043]">
+      <p className="mt-1 font-semibold text-[#202a47]">
         {value}
       </p>
     </div>
@@ -2644,7 +2644,7 @@ function ClienteSeleccionado({
   return (
     <div className="mt-3 flex items-start justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4">
       <div>
-        <p className="font-semibold text-[#253043]">
+        <p className="font-semibold text-[#202a47]">
           {
             cliente.nombreRazonSocial
           }
@@ -2659,7 +2659,7 @@ function ClienteSeleccionado({
       <button
         type="button"
         onClick={onClear}
-        className="text-xs font-semibold text-[#1f4f82]"
+        className="text-xs font-semibold text-[#284bc2]"
       >
         Cambiar
       </button>

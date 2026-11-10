@@ -153,7 +153,7 @@ export default function CargaMasiva() {
 
     const respuesta = await feedback.confirmar(
       '¿Confirmar importación?',
-      `SIGIFAC procesará ${preview.totalFilas} fila(s). Estrategia de duplicados: ${estrategia.replaceAll('_', ' ')}.`,
+      `Sertiva procesará ${preview.totalFilas} fila(s). Estrategia de duplicados: ${estrategia.replaceAll('_', ' ')}.`,
       'Importar datos',
     );
 
@@ -228,7 +228,7 @@ export default function CargaMasiva() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold text-[#253043]">
+        <h1 className="text-3xl font-semibold text-[#202a47]">
           Carga masiva
         </h1>
       </div>
@@ -257,7 +257,7 @@ export default function CargaMasiva() {
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="font-semibold text-[#253043]">
+            <h2 className="font-semibold text-[#202a47]">
               1. Archivo y destino
             </h2>
           </div>
@@ -266,7 +266,7 @@ export default function CargaMasiva() {
             type="button"
             onClick={descargarPlantilla}
             disabled={tipo === 'PRODUCTOS' && !entidadId}
-            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-[#1f4f82] disabled:opacity-40"
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-[#284bc2] disabled:opacity-40"
           >
             Descargar plantilla Excel
           </button>
@@ -275,12 +275,12 @@ export default function CargaMasiva() {
         {tipo === 'PRODUCTOS' && (
           <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <p className="mb-1.5 text-sm font-medium text-[#253043]">Inventario nacional</p>
+              <p className="mb-1.5 text-sm font-medium text-[#202a47]">Inventario nacional</p>
               {!inventarioId && <p className="text-sm text-slate-600">Crea primero una categoría estándar desde Inventario.</p>}
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-[#253043]">
+              <label className="mb-1.5 block text-sm font-medium text-[#202a47]">
                 Categoría *
               </label>
               <select
@@ -317,7 +317,7 @@ export default function CargaMasiva() {
 
           {archivo && (
             <div className="mt-3 rounded-lg bg-white px-4 py-3 text-sm">
-              <p className="font-semibold text-[#253043]">
+              <p className="font-semibold text-[#202a47]">
                 {archivo.name}
               </p>
               <p className="text-xs text-slate-500">
@@ -334,7 +334,7 @@ export default function CargaMasiva() {
             disabled={
               !puedePrevisualizar || previsualizar.isPending
             }
-            className="rounded-xl bg-[#1f4f82] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-[#284bc2] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {previsualizar.isPending
               ? 'Analizando archivo...'
@@ -351,7 +351,7 @@ export default function CargaMasiva() {
         <>
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
-              <h2 className="font-semibold text-[#253043]">
+              <h2 className="font-semibold text-[#202a47]">
                 2. Resultado de validación
               </h2>
               <p className="mt-1 text-sm text-slate-500">
@@ -404,7 +404,7 @@ export default function CargaMasiva() {
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
-              <h2 className="font-semibold text-[#253043]">
+              <h2 className="font-semibold text-[#202a47]">
                 3. Mapeo de columnas
               </h2>
             </div>
@@ -416,7 +416,7 @@ export default function CargaMasiva() {
                   className="grid grid-cols-1 items-center gap-3 rounded-xl border border-slate-100 p-3 md:grid-cols-[1fr_40px_1fr]"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-[#253043]">
+                    <p className="text-sm font-semibold text-[#202a47]">
                       {objetivo.etiqueta}
                       {objetivo.obligatorio ? ' *' : ''}
                     </p>
@@ -465,7 +465,7 @@ export default function CargaMasiva() {
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 className="font-semibold text-[#253043]">
+                <h2 className="font-semibold text-[#202a47]">
                   4. Vista previa
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
@@ -586,7 +586,7 @@ export default function CargaMasiva() {
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="font-semibold text-[#253043]">
+          <h2 className="font-semibold text-[#202a47]">
             Historial de cargas
           </h2>
         </div>
@@ -620,7 +620,7 @@ export default function CargaMasiva() {
                         trabajo.fechaCreacion,
                       ).toLocaleString('es-CO')}
                     </td>
-                    <td className="px-4 py-3 font-medium text-[#253043]">
+                    <td className="px-4 py-3 font-medium text-[#202a47]">
                       {trabajo.nombreArchivo}
                     </td>
                     <td className="px-4 py-3">
@@ -669,11 +669,11 @@ function Destino({
       onClick={onClick}
       className={`rounded-2xl border p-5 text-left transition ${
         active
-          ? 'border-[#1f4f82] bg-[#edf4ff] shadow-sm'
+          ? 'border-[#284bc2] bg-[#edf1ff] shadow-sm'
           : 'border-slate-200 bg-white hover:bg-slate-50'
       }`}
     >
-      <p className="font-semibold text-[#253043]">{title}</p>
+      <p className="font-semibold text-[#202a47]">{title}</p>
       <p className="mt-1 text-sm leading-6 text-slate-500">
         {text}
       </p>
@@ -701,7 +701,7 @@ function Kpi({
       <p className="text-xs uppercase tracking-wide text-slate-500">
         {label}
       </p>
-      <p className="mt-1 text-2xl font-semibold text-[#253043]">
+      <p className="mt-1 text-2xl font-semibold text-[#202a47]">
         {value}
       </p>
     </div>

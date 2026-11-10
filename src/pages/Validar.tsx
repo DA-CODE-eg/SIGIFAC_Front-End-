@@ -48,7 +48,7 @@ export default function Validar() {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
-          <span className="font-display text-xl text-ink block mb-8">SIGIFAC</span>
+          <span className="font-display text-xl text-ink block mb-8">Sertiva</span>
           <form onSubmit={validarIdentidad} className="flex flex-col gap-4">
             <h1 className="font-display text-2xl text-ink mb-1">Validar identidad</h1>
             <p className="text-slate text-sm">Ingresa tu identificacion y el codigo que te enviaron.</p>
@@ -84,7 +84,7 @@ export default function Validar() {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
-          <span className="font-display text-xl text-ink block mb-8">SIGIFAC</span>
+          <span className="font-display text-xl text-ink block mb-8">Sertiva</span>
           <form onSubmit={confirmarOtp} className="flex flex-col gap-4">
             <h1 className="font-display text-2xl text-ink mb-1">Confirma el codigo</h1>
             <p className="text-slate text-sm">Ingresa el codigo de un solo uso que recibiste.</p>
@@ -114,7 +114,7 @@ export default function Validar() {
   return (
     <div className="min-h-screen bg-paper flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
-        <span className="font-display text-xl text-ink block mb-8">SIGIFAC</span>
+        <span className="font-display text-xl text-ink block mb-8">Sertiva</span>
         <div className="border rounded-lg p-5">
           <h1 className="font-display text-2xl text-ink mb-2">Documento certificado</h1>
           <p className="text-slate text-sm mb-4">{documento ? documento.sello : ''}</p>

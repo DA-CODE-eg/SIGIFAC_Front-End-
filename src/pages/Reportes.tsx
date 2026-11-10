@@ -95,7 +95,7 @@ export default function Reportes() {
           <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
             Información · exportación · control
           </p>
-          <h1 className="text-3xl font-semibold text-[#253043]">
+          <h1 className="text-3xl font-semibold text-[#202a47]">
             Reportes
           </h1>
           <p className="mt-2 max-w-3xl text-slate-500">
@@ -113,7 +113,7 @@ export default function Reportes() {
                   onClick={() => setFormato(item)}
                   className={`rounded-xl px-4 py-2 text-sm font-semibold ${
                     formato === item
-                      ? 'bg-[#1f4f82] text-white'
+                      ? 'bg-[#284bc2] text-white'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -132,14 +132,14 @@ export default function Reportes() {
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           placeholder="Buscar reporte..."
-          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#1f4f82]"
+          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#284bc2]"
         />
       </div>
 
       {grupos.map((grupo) => (
         <section key={grupo}>
           <div className="mb-3 flex items-center gap-3">
-            <h2 className="text-lg font-semibold text-[#253043]">
+            <h2 className="text-lg font-semibold text-[#202a47]">
               {grupo}
             </h2>
             <div className="h-px flex-1 bg-slate-200" />
@@ -158,7 +158,7 @@ export default function Reportes() {
                       <p className="text-xs uppercase tracking-wide text-slate-400">
                         {reporte.grupo}
                       </p>
-                      <h3 className="mt-1 font-semibold text-[#253043]">
+                      <h3 className="mt-1 font-semibold text-[#202a47]">
                         {reporte.nombre}
                       </h3>
                       <p className="mt-2 text-sm text-slate-500">
@@ -166,7 +166,7 @@ export default function Reportes() {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-[#edf4ff] px-2.5 py-1 text-xs font-semibold text-[#1f4f82]">
+                    <span className="rounded-full bg-[#edf1ff] px-2.5 py-1 text-xs font-semibold text-[#284bc2]">
                       {formato === 'XLSX'
                         ? 'Excel'
                         : formato}
@@ -179,7 +179,7 @@ export default function Reportes() {
                     disabled={
                       descargando === reporte.tipo
                     }
-                    className="mt-5 w-full rounded-xl bg-[#1f4f82] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                    className="mt-5 w-full rounded-xl bg-[#284bc2] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                   >
                     {descargando === reporte.tipo
                       ? 'Generando...'
@@ -228,6 +228,6 @@ function descripcion(tipo: string) {
 
   return (
     descripciones[tipo] ??
-    'Información exportable de SIGIFAC.'
+    'Información exportable de Sertiva.'
   );
 }
