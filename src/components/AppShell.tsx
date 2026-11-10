@@ -30,7 +30,8 @@ type IconName =
   | 'notificaciones'
   | 'reportes'
   | 'usuarios'
-  | 'roles';
+  | 'roles'
+  | 'auditoria';
 
 const menuItems: MenuItem[] = [
   { to: '/dashboard', label: 'Dashboard', permiso: 'DASHBOARD_VER', icon: 'dashboard' },
@@ -45,6 +46,7 @@ const menuItems: MenuItem[] = [
   { to: '/reportes', label: 'Reportes', permiso: 'REPORTES_VER', icon: 'reportes' },
   { to: '/usuarios', label: 'Usuarios', permiso: 'USUARIOS_VER', icon: 'usuarios' },
   { to: '/roles', label: 'Roles y permisos', permiso: 'ROLES_VER', icon: 'roles' },
+  { to: '/auditoria', label: 'Auditoría', permiso: 'AUDITORIA_VER', icon: 'auditoria' },
 ];
 
 function MenuIcon({ name }: { name: IconName }) {
@@ -61,6 +63,7 @@ function MenuIcon({ name }: { name: IconName }) {
     notificaciones: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></>,
     reportes: <><path d="M5 20V10M12 20V4M19 20v-7"/><path d="M3 20h18"/></>,
     usuarios: <><circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6"/><path d="M17 8h4M19 6v4"/></>,
+    auditoria: <><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></>,
     roles: <><circle cx="8" cy="8" r="3"/><path d="M3 20c0-4 1.8-6 5-6 1.7 0 3 .6 4 1.6"/><path d="M16 14l1.5 1.5L21 12"/><path d="M14 20h7"/></>,
   };
   return <svg {...common} className="shrink-0 text-current">{paths[name]}</svg>;

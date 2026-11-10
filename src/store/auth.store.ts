@@ -5,6 +5,7 @@ export interface EmpresaSesion {
   id: number;
   nombreEmpresa: string;
   estado?: string;
+  accesoPorUsuario?: boolean;
 }
 
 export interface RolEmpresaSesion {

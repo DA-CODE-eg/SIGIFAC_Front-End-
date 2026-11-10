@@ -6,6 +6,7 @@ import { tienePermiso } from './lib/permisos';
 import { useAuthStore } from './store/auth.store';
 
 const AccesoDenegado = lazy(() => import('./pages/AccesoDenegado'));
+const Auditoria = lazy(() => import('./pages/Auditoria'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminEmpresaDetalle = lazy(() => import('./pages/AdminEmpresaDetalle'));
 const AdminEmpresas = lazy(() => import('./pages/AdminEmpresas'));
@@ -96,6 +97,7 @@ export default function App() {
         <Route path="/validar" element={<RutaTenant permiso="CERTIFICACION_VER"><Validar /></RutaTenant>} />
         <Route path="/notificaciones" element={<RutaTenant permiso="NOTIFICACIONES_VER"><Notificaciones /></RutaTenant>} />
         <Route path="/reportes" element={<RutaTenant permiso="REPORTES_VER"><Reportes /></RutaTenant>} />
+        <Route path="/auditoria" element={<RutaTenant permiso="AUDITORIA_VER"><Auditoria /></RutaTenant>} />
         <Route path="/usuarios" element={<RutaTenant permiso="USUARIOS_VER"><Usuarios /></RutaTenant>} />
         <Route path="/roles" element={<RutaTenant permiso="ROLES_VER"><RolesPermisos /></RutaTenant>} />
 

@@ -10,6 +10,7 @@ interface Empresa {
   nombreEmpresa: string;
   identificacion: string;
   tipoEmpresa: string;
+  accesoPorUsuario?: boolean;
   correoContacto: string;
   estado: string;
   _count?: { usuarios?: number; modulos?: number; inventarios?: number };
@@ -33,6 +34,7 @@ export default function AdminEmpresaDetalle() {
   const [nombreEmpresa, setNombreEmpresa] = useState('');
   const [correoContacto, setCorreoContacto] = useState('');
   const [estado, setEstado] = useState('ACTIVA');
+  const [accesoPorUsuario, setAccesoPorUsuario] = useState(false);
 
   const { data: empresa, isLoading: cargandoEmpresa } = useQuery<Empresa>({
     queryKey: ['admin-empresa', empresaId],
@@ -51,10 +53,11 @@ export default function AdminEmpresaDetalle() {
     setNombreEmpresa(empresa.nombreEmpresa);
     setCorreoContacto(empresa.correoContacto);
     setEstado(empresa.estado);
+    setAccesoPorUsuario(Boolean(empresa.accesoPorUsuario));
   }, [empresa]);
 
   const actualizarEmpresa = useMutation({
-    mutationFn: async () => api.patch(`/admin/empresas/${empresaId}`, { nombreEmpresa, correoContacto, estado }),
+    mutationFn: async () => api.patch(`/admin/empresas/${empresaId}`, { nombreEmpresa, correoContacto, estado, accesoPorUsuario }),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-empresa', empresaId] }),
@@ -142,6 +145,10 @@ export default function AdminEmpresaDetalle() {
             <label className="text-sm text-slate-600">Estado<select className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5" value={estado} onChange={(e) => setEstado(e.target.value)}><option value="ACTIVA">ACTIVA</option><option value="INACTIVA">INACTIVA</option></select></label>
             <label className="text-sm text-slate-600 md:col-span-2">Correo de contacto<input type="email" className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5" value={correoContacto} onChange={(e) => setCorreoContacto(e.target.value)} /></label>
           </div>
+          <label className="mt-5 flex items-start gap-3 rounded-xl bg-indigo-50 p-3 text-sm text-ink">
+            <input className="mt-1" type="checkbox" checked={accesoPorUsuario} onChange={(e) => setAccesoPorUsuario(e.target.checked)} />
+            <span>Permitir ingreso con nombre de usuario <small className="block text-slate-600">Puedes asignar los nombres desde Usuarios en el espacio de la empresa.</small></span>
+          </label>
           <div className="mt-5 flex justify-end"><button disabled={actualizarEmpresa.isPending} className="rounded-xl bg-[#284bc2] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{actualizarEmpresa.isPending ? 'Guardando...' : 'Guardar cambios'}</button></div>
         </form>
 

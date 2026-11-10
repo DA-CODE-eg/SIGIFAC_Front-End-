@@ -31,6 +31,8 @@ export default function AdminEmpresas() {
   const [nombreAdmin, setNombreAdmin] = useState('');
   const [correoAdmin, setCorreoAdmin] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [accesoPorUsuario, setAccesoPorUsuario] = useState(false);
+  const [nombreUsuario, setNombreUsuario] = useState('');
 
   const { data: empresas = [], isLoading } = useQuery<Empresa[]>({
     queryKey: ['admin-empresas'],
@@ -44,11 +46,13 @@ export default function AdminEmpresas() {
         identificacion,
         tipoEmpresa: 'PEQUENA',
         correoContacto,
+        accesoPorUsuario,
         administrador: nombreAdmin && correoAdmin && contrasena
           ? {
               nombreCompleto: nombreAdmin,
               correo: correoAdmin,
               contrasena,
+              nombreUsuario: accesoPorUsuario ? nombreUsuario : undefined,
             }
           : undefined,
       }),
@@ -61,6 +65,8 @@ export default function AdminEmpresas() {
       setNombreAdmin('');
       setCorreoAdmin('');
       setContrasena('');
+      setAccesoPorUsuario(false);
+      setNombreUsuario('');
       setMostrarFormulario(false);
     },
   });
@@ -93,6 +99,7 @@ export default function AdminEmpresas() {
     await feedback.exito('Empresa eliminada', `${empresa.nombreEmpresa} fue eliminada permanentemente.`);
   };
 
+  const datosAdministrador = Boolean(nombreAdmin || correoAdmin || contrasena || (accesoPorUsuario && nombreUsuario));
   const filtro = busqueda.trim().toLowerCase();
   const empresasFiltradas = empresas.filter((empresa) =>
     [empresa.nombreEmpresa, empresa.identificacion, empresa.correoContacto]
@@ -146,6 +153,11 @@ export default function AdminEmpresas() {
             </label>
           </div>
 
+          <label className="mt-5 flex items-start gap-3 rounded-xl bg-indigo-50 p-3 text-sm text-ink">
+            <input className="mt-1" type="checkbox" checked={accesoPorUsuario} onChange={(e) => setAccesoPorUsuario(e.target.checked)} />
+            <span>Permitir ingreso con nombre de usuario <small className="block text-slate-600">El correo seguirá disponible para iniciar sesión.</small></span>
+          </label>
+
           <div className="my-6 border-t border-slate-200" />
 
           <div className="mb-4">
@@ -153,13 +165,20 @@ export default function AdminEmpresas() {
             
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input className="rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#284bc2]" placeholder="Nombre completo" value={nombreAdmin} onChange={(e) => setNombreAdmin(e.target.value)} />
-            <input type="email" className="rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#284bc2]" placeholder="Correo administrador" value={correoAdmin} onChange={(e) => setCorreoAdmin(e.target.value)} />
-            <input type="password" className="rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#284bc2]" placeholder="Contraseña inicial" value={contrasena} onChange={(e) => setContrasena(e.target.value)} />
+            <input className="rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#284bc2]" placeholder="Nombre completo" required={datosAdministrador} value={nombreAdmin} onChange={(e) => setNombreAdmin(e.target.value)} />
+            <input type="email" className="rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#284bc2]" placeholder="Correo administrador" required={datosAdministrador} value={correoAdmin} onChange={(e) => setCorreoAdmin(e.target.value)} />
+            <input type="password" className="rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#284bc2]" placeholder="Contraseña inicial" required={datosAdministrador} value={contrasena} onChange={(e) => setContrasena(e.target.value)} />
           </div>
 
+          {accesoPorUsuario && (
+            <label className="mt-4 block text-sm text-slate-600">
+              Usuario del administrador inicial (opcional)
+              <input className="mt-1 block w-full max-w-sm rounded-xl border border-slate-300 px-3 py-2.5" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} placeholder="daniel876" maxLength={30} autoCapitalize="none" />
+            </label>
+          )}
+
           {crearEmpresa.isError && (
-            <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">No se pudo crear la empresa. Revisa si el NIT o correo ya existen.</p>
+            <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">No se pudo crear la empresa. Revisa el NIT, el correo y el nombre de usuario.</p>
           )}
 
           <div className="mt-5 flex justify-end">

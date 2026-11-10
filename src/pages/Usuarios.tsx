@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { feedback } from '../lib/feedback';
-import { tienePermiso } from '../lib/permisos';
+import { empresaEfectivaId, tienePermiso } from '../lib/permisos';
 import { useAuthStore } from '../store/auth.store';
 
 interface RolEmpresa { id: number; nombre: string; activo: boolean }
@@ -10,6 +10,7 @@ interface UsuarioEmpresa {
   id: number;
   nombreCompleto: string;
   correo: string;
+  nombreUsuario?: string | null;
   rol: 'ADMINISTRADOR' | 'OPERADOR';
   estado: 'ACTIVO' | 'INACTIVO';
   rolEmpresaId?: number | null;
@@ -19,16 +20,24 @@ interface UsuarioEmpresa {
 type FormUsuario = {
   nombreCompleto: string;
   correo: string;
+  nombreUsuario: string;
   contrasena: string;
   rol: 'ADMINISTRADOR' | 'OPERADOR';
   rolEmpresaId: string;
 };
 
-const inicial: FormUsuario = { nombreCompleto: '', correo: '', contrasena: '', rol: 'OPERADOR', rolEmpresaId: '' };
+const inicial: FormUsuario = { nombreCompleto: '', correo: '', nombreUsuario: '', contrasena: '', rol: 'OPERADOR', rolEmpresaId: '' };
 
 export default function Usuarios() {
   const queryClient = useQueryClient();
   const usuarioSesion = useAuthStore((state) => state.usuario);
+  const empresaId = empresaEfectivaId(usuarioSesion);
+  const { data: configuracion } = useQuery({
+    queryKey: ['usuarios-configuracion-acceso', empresaId],
+    queryFn: async () => (await api.get<{ accesoPorUsuario: boolean }>('/usuarios/configuracion-acceso')).data,
+    enabled: empresaId !== null,
+  });
+  const accesoPorUsuario = Boolean(configuracion?.accesoPorUsuario ?? usuarioSesion?.empresa?.accesoPorUsuario);
   const puedeCrear = tienePermiso(usuarioSesion, 'USUARIOS_CREAR');
   const puedeEditar = tienePermiso(usuarioSesion, 'USUARIOS_EDITAR');
   const puedeDesactivar = tienePermiso(usuarioSesion, 'USUARIOS_DESACTIVAR');
@@ -40,12 +49,12 @@ export default function Usuarios() {
   const [editando, setEditando] = useState<UsuarioEmpresa | null>(null);
   const [form, setForm] = useState<FormUsuario>(inicial);
 
-  const { data: usuarios = [], isLoading } = useQuery<UsuarioEmpresa[]>({ queryKey: ['usuarios-empresa'], queryFn: async () => (await api.get('/usuarios')).data });
+  const { data: usuarios = [], isLoading } = useQuery<UsuarioEmpresa[]>({ queryKey: ['usuarios-empresa', empresaId], queryFn: async () => (await api.get('/usuarios')).data });
   const { data: roles = [] } = useQuery<RolEmpresa[]>({ queryKey: ['roles-empresa'], queryFn: async () => (await api.get('/roles')).data, enabled: puedeVerRoles });
 
   const filtrados = useMemo(() => {
     const q = buscar.trim().toLowerCase();
-    return usuarios.filter((u) => `${u.nombreCompleto} ${u.correo} ${u.rol} ${u.rolEmpresa?.nombre ?? ''}`.toLowerCase().includes(q));
+    return usuarios.filter((u) => `${u.nombreCompleto} ${u.correo} ${u.nombreUsuario ?? ''} ${u.rol} ${u.rolEmpresa?.nombre ?? ''}`.toLowerCase().includes(q));
   }, [usuarios, buscar]);
 
   const cerrar = () => { setMostrar(false); setEditando(null); setForm(inicial); };
@@ -56,6 +65,7 @@ export default function Usuarios() {
         return api.patch(`/usuarios/${editando.id}`, {
           nombreCompleto: form.nombreCompleto,
           correo: form.correo,
+          nombreUsuario: accesoPorUsuario ? form.nombreUsuario : undefined,
           rol: form.rol,
           rolEmpresaId: form.rol === 'OPERADOR' ? Number(form.rolEmpresaId) : null,
         });
@@ -63,6 +73,7 @@ export default function Usuarios() {
       return api.post('/usuarios', {
         nombreCompleto: form.nombreCompleto,
         correo: form.correo,
+          nombreUsuario: accesoPorUsuario ? form.nombreUsuario : undefined,
         contrasena: form.contrasena,
         rol: form.rol,
         rolEmpresaId: form.rol === 'OPERADOR' ? Number(form.rolEmpresaId) : null,
@@ -98,7 +109,7 @@ export default function Usuarios() {
 
   const abrirEditar = (u: UsuarioEmpresa) => {
     setEditando(u);
-    setForm({ nombreCompleto: u.nombreCompleto, correo: u.correo, contrasena: '', rol: u.rol, rolEmpresaId: u.rolEmpresaId ? String(u.rolEmpresaId) : '' });
+    setForm({ nombreCompleto: u.nombreCompleto, correo: u.correo, nombreUsuario: u.nombreUsuario ?? '', contrasena: '', rol: u.rol, rolEmpresaId: u.rolEmpresaId ? String(u.rolEmpresaId) : '' });
     setMostrar(true);
   };
 
@@ -123,7 +134,7 @@ export default function Usuarios() {
         <div className="flex flex-col gap-3 border-b p-4 md:flex-row md:items-center md:justify-between"><div><h2 className="font-semibold text-[#202a47]">Usuarios de la empresa</h2><p className="text-xs text-slate-500">{filtrados.length} resultado(s)</p></div><input value={buscar} onChange={(e) => setBuscar(e.target.value)} placeholder="Buscar nombre, correo o rol..." className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm md:w-80" /></div>
         {isLoading ? <p className="p-8 text-center text-sm text-slate-500">Cargando usuarios...</p> : (
           <div className="overflow-x-auto"><table className="w-full min-w-[900px] text-sm"><thead><tr className="bg-slate-50 text-left text-xs uppercase text-slate-500"><th className="px-4 py-3">Usuario</th><th className="px-4 py-3">Tipo</th><th className="px-4 py-3">Rol empresarial</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3 text-right">Acciones</th></tr></thead><tbody>{filtrados.map((u) => (
-            <tr key={u.id} className="border-t"><td className="px-4 py-3"><p className="font-semibold text-[#202a47]">{u.nombreCompleto}</p><p className="text-xs text-slate-500">{u.correo}</p></td><td className="px-4 py-3">{u.rol}</td><td className="px-4 py-3">{u.rol === 'ADMINISTRADOR' ? 'Acceso total' : u.rolEmpresa?.nombre ?? 'Sin rol'}</td><td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${u.estado === 'ACTIVO' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{u.estado}</span></td><td className="px-4 py-3"><div className="flex justify-end gap-2">{puedeEditar && <button onClick={() => abrirEditar(u)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold text-[#284bc2]">Editar</button>}{(u.estado === 'INACTIVO' ? puedeEditar : puedeDesactivar) && <button onClick={() => cambiarEstado.mutate(u)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold">{u.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'}</button>}{puedePassword && <button onClick={() => cambiarContrasena(u)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold">Contraseña</button>}{puedeEliminar && <button onClick={() => eliminarUsuario(u)} className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">Eliminar</button>}</div></td></tr>
+            <tr key={u.id} className="border-t"><td className="px-4 py-3"><p className="font-semibold text-[#202a47]">{u.nombreCompleto}</p><p className="text-xs text-slate-500">{u.correo}</p>{u.nombreUsuario && <p className="text-xs text-indigo-700">@{u.nombreUsuario}</p>}</td><td className="px-4 py-3">{u.rol}</td><td className="px-4 py-3">{u.rol === 'ADMINISTRADOR' ? 'Acceso total' : u.rolEmpresa?.nombre ?? 'Sin rol'}</td><td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${u.estado === 'ACTIVO' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{u.estado}</span></td><td className="px-4 py-3"><div className="flex justify-end gap-2">{puedeEditar && <button onClick={() => abrirEditar(u)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold text-[#284bc2]">Editar</button>}{(u.estado === 'INACTIVO' ? puedeEditar : puedeDesactivar) && <button onClick={() => cambiarEstado.mutate(u)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold">{u.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'}</button>}{puedePassword && <button onClick={() => cambiarContrasena(u)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold">Contraseña</button>}{puedeEliminar && <button onClick={() => eliminarUsuario(u)} className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600">Eliminar</button>}</div></td></tr>
           ))}</tbody></table></div>
         )}
       </section>
@@ -132,6 +143,8 @@ export default function Usuarios() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4"><div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl"><div className="flex items-center justify-between border-b px-6 py-4"><div><h2 className="text-xl font-semibold text-[#202a47]">{editando ? 'Editar usuario' : 'Nuevo usuario'}</h2></div><button onClick={cerrar} className="h-9 w-9 rounded-lg text-xl text-slate-400">×</button></div>
           <form onSubmit={(e) => { e.preventDefault(); guardar.mutate(); }} className="grid gap-4 p-6">
             <label className="text-sm font-medium">Nombre completo<input required value={form.nombreCompleto} onChange={(e) => setForm({ ...form, nombreCompleto: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3" /></label>
+            {accesoPorUsuario && <label className="text-sm font-medium">Nombre de usuario (opcional)<input value={form.nombreUsuario} onChange={(e) => setForm({ ...form, nombreUsuario: e.target.value })} maxLength={30} autoCapitalize="none" placeholder="daniel876" className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3" /></label>}
+
             <label className="text-sm font-medium">Correo<input required type="email" value={form.correo} onChange={(e) => setForm({ ...form, correo: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3" /></label>
             {!editando && <label className="text-sm font-medium">Contraseña inicial<input required minLength={8} type="password" value={form.contrasena} onChange={(e) => setForm({ ...form, contrasena: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3" /></label>}
             <label className="text-sm font-medium">Tipo de usuario<select value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value as 'ADMINISTRADOR' | 'OPERADOR', rolEmpresaId: e.target.value === 'ADMINISTRADOR' ? '' : form.rolEmpresaId })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3"><option value="OPERADOR">OPERADOR</option><option value="ADMINISTRADOR">ADMINISTRADOR</option></select></label>

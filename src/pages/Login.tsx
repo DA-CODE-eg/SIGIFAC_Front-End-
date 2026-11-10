@@ -18,12 +18,13 @@ declare global {
           sitekey: string;
           theme?: 'light' | 'dark' | 'auto';
           size?: 'normal' | 'compact' | 'flexible';
+          appearance?: 'interaction-only';
           callback?: (token: string) => void;
           'expired-callback'?: () => void;
           'error-callback'?: () => void;
+          'timeout-callback'?: () => void;
         },
       ) => string;
-      reset: (widgetId?: string) => void;
       remove?: (widgetId?: string) => void;
     };
   }
@@ -33,158 +34,91 @@ export default function Login() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
-  const [correo, setCorreo] = useState('');
+  const [identificador, setIdentificador] = useState('');
   const [contrasena, setContrasena] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState('');
+  const [intento, setIntento] = useState<{ identificador: string; contrasena: string }>();
   const [turnstileError, setTurnstileError] = useState('');
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim();
 
-  const turnstileContainerRef =
-    useRef<HTMLDivElement | null>(null);
-  const turnstileWidgetIdRef =
-    useRef<string | null>(null);
-
-  const siteKey =
-    import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim();
-
-  const resetTurnstile = () => {
-    setTurnstileToken('');
-
-    if (
-      window.turnstile &&
-      turnstileWidgetIdRef.current
-    ) {
-      window.turnstile.reset(
-        turnstileWidgetIdRef.current,
-      );
-    }
-  };
+  const login = useMutation({
+    mutationFn: async (datos: { identificador: string; contrasena: string; turnstileToken: string }) =>
+      (await api.post('/auth/login', datos)).data,
+    onSuccess: (data) => {
+      setAuth(data.token, data.usuario);
+      navigate(data.usuario.rol === 'SUPER_ADMIN' ? '/admin' : '/dashboard');
+    },
+    onError: () => setIntento(undefined),
+  });
+  const { mutate } = login;
 
   useEffect(() => {
-    if (!siteKey) {
-      setTurnstileError(
-        'Falta configurar VITE_TURNSTILE_SITE_KEY.',
-      );
-      return;
-    }
+    if (!intento || !siteKey) return;
 
     let cancelado = false;
+    let enviado = false;
+    let widgetId: string | undefined;
+    let script = document.querySelector<HTMLScriptElement>('script[data-sigifac-turnstile="true"]');
 
-    const renderWidget = () => {
-      if (
-        cancelado ||
-        !window.turnstile ||
-        !turnstileContainerRef.current ||
-        turnstileWidgetIdRef.current
-      ) {
+    function fallar(mensaje: string) {
+      if (cancelado || enviado) return;
+      setTurnstileError(mensaje);
+      setIntento(undefined);
+    }
+
+    function cargarWidget() {
+      if (cancelado || !turnstileContainerRef.current) return;
+      if (!window.turnstile) {
+        fallar('No se pudo cargar la verificación de seguridad. Inténtalo de nuevo.');
         return;
       }
-
       try {
-        turnstileWidgetIdRef.current =
-          window.turnstile.render(
-            turnstileContainerRef.current,
-            {
-              sitekey: siteKey,
-              theme: 'light',
-              size: 'flexible',
-              callback: (token: string) => {
-                setTurnstileToken(token);
-                setTurnstileError('');
-              },
-              'expired-callback': () => {
-                setTurnstileToken('');
-                setTurnstileError(
-                  'La verificación expiró. Inténtalo nuevamente.',
-                );
-              },
-              'error-callback': () => {
-                setTurnstileToken('');
-                setTurnstileError(
-                  'No se pudo completar la verificación de seguridad.',
-                );
-              },
-            },
-          );
+        widgetId = window.turnstile.render(turnstileContainerRef.current, {
+          sitekey: siteKey!,
+          theme: 'light',
+          size: 'flexible',
+          appearance: 'interaction-only',
+          callback: (token) => {
+            if (cancelado || enviado) return;
+            enviado = true;
+            mutate({ ...intento!, turnstileToken: token });
+          },
+          'expired-callback': () => fallar('La verificación expiró. Pulsa Entrar de nuevo.'),
+          'timeout-callback': () => fallar('La verificación tardó demasiado. Inténtalo de nuevo.'),
+          'error-callback': () => fallar('No se pudo completar la verificación de seguridad.'),
+        });
       } catch {
-        setTurnstileError('No se pudo iniciar la verificación de seguridad.');
+        fallar('No se pudo iniciar la verificación de seguridad.');
       }
-    };
+    }
 
-    const existente = document.querySelector(
-      'script[data-sigifac-turnstile="true"]',
-    ) as HTMLScriptElement | null;
+    function errorCarga() {
+      script?.remove();
+      fallar('No se pudo cargar la verificación de seguridad. Inténtalo de nuevo.');
+    }
 
     if (window.turnstile) {
-      renderWidget();
-    } else if (existente) {
-      existente.addEventListener(
-        'load',
-        renderWidget,
-      );
+      cargarWidget();
     } else {
-      const script =
-        document.createElement('script');
-
-      script.src =
-        'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-      script.async = true;
-      script.defer = true;
-      script.dataset.sigifacTurnstile =
-        'true';
-      script.addEventListener(
-        'load',
-        renderWidget,
-      );
-
-      document.head.appendChild(script);
+      const nuevo = !script;
+      if (!script) {
+        script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.dataset.sigifacTurnstile = 'true';
+      }
+      script.addEventListener('load', cargarWidget);
+      script.addEventListener('error', errorCarga);
+      if (nuevo) document.head.appendChild(script);
     }
 
     return () => {
       cancelado = true;
-
-      if (existente) {
-        existente.removeEventListener(
-          'load',
-          renderWidget,
-        );
-      }
-
-      if (
-        window.turnstile?.remove &&
-        turnstileWidgetIdRef.current
-      ) {
-        window.turnstile.remove(
-          turnstileWidgetIdRef.current,
-        );
-      }
-
-      turnstileWidgetIdRef.current = null;
+      script?.removeEventListener('load', cargarWidget);
+      script?.removeEventListener('error', errorCarga);
+      if (widgetId !== undefined) window.turnstile?.remove?.(widgetId);
     };
-  }, [siteKey]);
-
-  const login = useMutation({
-    mutationFn: async () =>
-      (
-        await api.post('/auth/login', {
-          correo,
-          contrasena,
-          turnstileToken,
-        })
-      ).data,
-
-    onSuccess: (data) => {
-      setAuth(data.token, data.usuario);
-      navigate(
-        data.usuario.rol === 'SUPER_ADMIN'
-          ? '/admin'
-          : '/dashboard',
-      );
-    },
-
-    onError: () => {
-      resetTurnstile();
-    },
-  });
+  }, [intento, mutate, siteKey]);
 
   const mensajeError = (() => {
     const error = login.error as any;
@@ -228,30 +162,31 @@ export default function Login() {
             onSubmit={(e) => {
               e.preventDefault();
 
-              if (!turnstileToken) {
-                setTurnstileError(
-                  'Completa la verificación de seguridad antes de ingresar.',
-                );
+              if (intento || login.isPending || !identificador.trim()) return;
+              if (!siteKey) {
+                setTurnstileError('Falta configurar la verificación de seguridad.');
                 return;
               }
-
-              login.mutate();
+              login.reset();
+              setTurnstileError('');
+              setIntento({ identificador: identificador.trim(), contrasena });
             }}
             className="flex flex-col gap-5"
           >
             <div>
-              <label htmlFor="correo" className="mb-1.5 block text-sm font-semibold text-slate-700">
-                Correo
+              <label htmlFor="identificador" className="mb-1.5 block text-sm font-semibold text-slate-700">
+                Usuario o correo
               </label>
 
               <input
                 className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-ink outline-none focus:border-emerald focus:ring-2 focus:ring-indigo-100"
-                id="correo" type="email"
-                value={correo}
+                id="identificador" type="text" maxLength={254} autoCapitalize="none" spellCheck={false}
+                value={identificador}
                 onChange={(e) =>
-                  setCorreo(e.target.value)
+                  setIdentificador(e.target.value)
                 }
                 autoComplete="username"
+                disabled={Boolean(intento)}
                 required
               />
             </div>
@@ -269,28 +204,25 @@ export default function Login() {
                   setContrasena(e.target.value)
                 }
                 autoComplete="current-password"
+                disabled={Boolean(intento)}
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <div
-                ref={turnstileContainerRef}
-                className="min-h-[65px] w-full"
-              />
+            {(intento || turnstileError) && <div className="space-y-2">
+              {intento && <div ref={turnstileContainerRef} className="w-full" /> }
 
               {turnstileError && (
                 <p className="text-sm text-red-700">
                   {turnstileError}
                 </p>
               )}
-            </div>
+            </div>}
 
             <button
               type="submit"
               disabled={
-                login.isPending ||
-                !turnstileToken
+                login.isPending || Boolean(intento)
               }
               className="mt-1 relative bg-emerald hover:bg-emerald-light text-paper font-medium py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
             >
@@ -300,8 +232,12 @@ export default function Login() {
 
               {login.isPending
                 ? 'Validando acceso...'
-                : 'Entrar'}
+                : intento ? 'Verificando seguridad…' : 'Entrar'}
             </button>
+
+            {intento && !login.isPending && (
+              <button type="button" onClick={() => setIntento(undefined)} className="text-sm text-[#284bc2]">Cancelar verificación</button>
+            )}
 
             {login.isError && (
               <p className="text-sm text-red-700">

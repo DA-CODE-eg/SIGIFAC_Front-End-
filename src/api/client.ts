@@ -107,7 +107,7 @@ api.interceptors.response.use(
       detalle: error?.response?.data ?? error?.message,
     });
 
-    if (status !== 401) {
+    if (status !== 401 && !String(error?.config?.url ?? '').startsWith('/perfil')) {
       void feedback.toast('error', mensajeAmigableError(error));
     }
 
