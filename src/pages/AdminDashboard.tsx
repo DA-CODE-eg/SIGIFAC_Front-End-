@@ -1,3 +1,4 @@
+import ComercialSertiva from '../components/ComercialSertiva';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
@@ -69,6 +70,8 @@ export default function AdminDashboard() {
           </div>
         ))}
       </section>
+
+      <ComercialSertiva />
 
       <section className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.6fr)_360px] gap-5">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

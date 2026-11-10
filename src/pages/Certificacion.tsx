@@ -446,6 +446,8 @@ export default function Certificacion() {
               id: i.id,
               nombreProducto:
                 i.nombreProducto,
+              bodegaNombre: i.bodegaNombre,
+              loteCodigo: i.loteCodigo,
               referencia:
                 i.referencia,
               inventario:

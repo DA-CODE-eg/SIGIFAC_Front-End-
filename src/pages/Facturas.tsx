@@ -26,6 +26,7 @@ interface ProductoInventario {
   nombre: string;
   referencia: string;
   cantidad: number;
+  cantidadPrincipal: number;
   precio: number;
   inventario: string;
   categoria: string;
@@ -40,6 +41,9 @@ interface ItemBorrador {
   inventario: string;
   categoria: string;
   stockDisponible: number;
+  stockPrincipal: number;
+  bodegaId?: number;
+  loteId?: number;
   cantidad: number;
   precioUnitario: number;
   descuento: number;
@@ -235,7 +239,7 @@ export default function Facturas() {
               'REGISTRO_ENTIDAD' &&
             producto.activo !== false &&
             Number(
-              producto.cantidadPrincipal ?? producto.cantidad ?? 0,
+              producto.cantidad ?? 0,
             ) > 0,
         )
         .map((producto: any) => ({
@@ -252,8 +256,9 @@ export default function Facturas() {
             producto.referencia ?? '',
           ),
           cantidad: Number(
-            producto.cantidadPrincipal ?? producto.cantidad ?? 0,
+            producto.cantidad ?? 0,
           ),
+          cantidadPrincipal: Number(producto.cantidadPrincipal ?? producto.cantidad ?? 0),
           precio: Number(
             producto.precio ?? 0,
           ),
@@ -307,6 +312,8 @@ export default function Facturas() {
                   item.registroId,
                 cantidad:
                   item.cantidad,
+                bodegaId: item.bodegaId,
+                loteId: item.loteId,
                 precioUnitario:
                   item.precioUnitario,
                 descuento:
@@ -874,8 +881,8 @@ export default function Facturas() {
           producto.inventario,
         categoria:
           producto.categoria,
-        stockDisponible:
-          producto.cantidad,
+        stockDisponible: producto.cantidadPrincipal,
+        stockPrincipal: producto.cantidadPrincipal,
         cantidad: 1,
         precioUnitario:
           producto.precio,
@@ -1530,7 +1537,7 @@ export default function Facturas() {
                                 )}
                               </p>
                               <p className="text-xs text-slate-500">
-                                Bodega principal sin lote:{' '}
+                                Disponible total:{' '}
                                 {
                                   producto.cantidad
                                 }
@@ -1602,22 +1609,14 @@ export default function Facturas() {
                                   item.nombre
                                 }
                               </p>
-                              <p className="text-xs text-slate-500">
-                                Stock:{' '}
-                                {
-                                  item.stockDisponible
-                                }{' '}
-                                ·{' '}
-                                {
-                                  item.inventario
-                                }
-                              </p>
+                              <OrigenVenta item={item} onChange={(cambios) => actualizarItem(item.registroId, cambios)} />
                             </td>
 
                             <td className="px-3 py-3">
                               <input
                                 type="number"
-                                min={1}
+                                min={0.001}
+                                step={0.001}
                                 max={
                                   item.stockDisponible
                                 }
@@ -1912,6 +1911,7 @@ export default function Facturas() {
                           {
                             item.nombreProducto
                           }
+                          {item.bodegaNombre && <p className="text-xs text-slate-500">{item.bodegaNombre} · {item.loteCodigo ?? 'Sin lote'}</p>}
                         </td>
                         <td className="px-3 py-3">
                           {Number(
@@ -2678,4 +2678,33 @@ function moneda(value: number) {
   ).format(
     Number(value || 0),
   );
+}
+
+function OrigenVenta({ item, onChange }: { item: ItemBorrador; onChange: (cambios: Partial<ItemBorrador>) => void }) {
+  type Origen = { bodegaId: number; loteId: number; bodegaNombre: string; loteCodigo: string | null; cantidad: string };
+  const opciones = useQuery({
+    queryKey: ['origenes-factura', item.registroId],
+    queryFn: async () => (await api.get<Origen[]>(`/facturas-integradas/origenes/${item.registroId}`)).data,
+  });
+  const clave = (origen: Origen) => `${origen.bodegaId}:${origen.loteId}`;
+  return <label className="mt-1 block min-w-52 text-xs text-slate-600">
+    Bodega y lote
+    <select
+      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5"
+      value={item.bodegaId ? `${item.bodegaId}:${item.loteId ?? 0}` : ''}
+      onChange={(evento) => {
+        const origen = opciones.data?.find((opcion) => clave(opcion) === evento.target.value);
+        onChange({ bodegaId: origen?.bodegaId, loteId: origen?.loteId, stockDisponible: origen ? Number(origen.cantidad) : item.stockPrincipal });
+      }}
+    >
+      <option value="">Principal sin lote · {item.stockPrincipal} disp.</option>
+      {item.bodegaId && !opciones.data?.some((origen) => clave(origen) === `${item.bodegaId}:${item.loteId ?? 0}`) &&
+        <option value={`${item.bodegaId}:${item.loteId ?? 0}`}>Origen seleccionado</option>}
+      {opciones.data?.map((origen) => <option key={clave(origen)} value={clave(origen)}>
+        {origen.bodegaNombre} · {origen.loteCodigo ?? 'Sin lote'} · {origen.cantidad} disp.
+      </option>)}
+    </select>
+    {opciones.isPending && <span className="mt-1 block">Consultando existencias…</span>}
+    {opciones.isError && <span className="mt-1 block text-red-700">No se pudieron consultar las bodegas. <button type="button" onClick={() => void opciones.refetch()} className="underline">Reintentar</button></span>}
+  </label>;
 }
