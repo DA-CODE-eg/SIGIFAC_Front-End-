@@ -467,7 +467,7 @@ export default function Facturas() {
           ),
         ]);
 
-      setFacturaLinkPago(detalle);
+      setFacturaLinkPago({ ...detalle, saldoPendiente: String(checkout.saldoCobrado ?? detalle.saldoPendiente) });
       setCheckoutUrlPago(
         checkout.checkoutUrl ?? '',
       );
@@ -493,206 +493,23 @@ export default function Facturas() {
     setCorreoAlternativoPago('');
   };
 
-  const resumenPago = (
-    factura: Factura | null,
-  ) => {
-    const lineas =
-      factura?.items ?? [];
-
-    const bruto = lineas.reduce(
-      (suma: number, item: any) =>
-        suma +
-        Number(item.cantidad ?? 0) *
-          Number(item.precioUnitario ?? 0),
-      0,
-    );
-
-    const descuentos = lineas.reduce(
-      (suma: number, item: any) =>
-        suma +
-        Number(item.descuento ?? 0),
-      0,
-    );
-
-    const impuestos = lineas.reduce(
-      (suma: number, item: any) =>
-        suma +
-        Number(item.impuesto ?? 0),
-      0,
-    );
-
-    return {
-      bruto,
-      descuentos,
-      impuestos,
-      total: Number(
-        factura?.valorTotal ?? 0,
-      ),
-      saldo: Number(
-        factura?.saldoPendiente ?? 0,
-      ),
-    };
+  const construirMensajePago = (factura: Factura) => {
+    const numero = factura.numeroFactura ?? `#${factura.id}`;
+    return `Sertiva · ${numero} · Saldo: ${moneda(Number(factura.saldoPendiente))}. Paga aquí: ${checkoutUrlPago}`;
   };
 
-  const construirMensajePago = (
-    factura: Factura,
-    canal:
-      | 'CORREO'
-      | 'WHATSAPP'
-      | 'SMS',
-  ) => {
-    const numero =
-      factura.numeroFactura ??
-      `Factura #${factura.id}`;
-
-    const resumen =
-      resumenPago(factura);
-
-    const productos = (
-      factura.items ?? []
-    ).map((item: any) => {
-      const cantidad = Number(
-        item.cantidad ?? 0,
-      );
-
-      const precio = Number(
-        item.precioUnitario ?? 0,
-      );
-
-      const descuento = Number(
-        item.descuento ?? 0,
-      );
-
-      const impuesto = Number(
-        item.impuesto ?? 0,
-      );
-
-      const subtotal = Number(
-        item.subtotal ?? 0,
-      );
-
-      if (canal === 'SMS') {
-        return `${item.nombreProducto} x${cantidad}: ${moneda(
-          subtotal,
-        )}`;
-      }
-
-      return [
-        `• ${item.nombreProducto}`,
-        `  Cantidad: ${cantidad}`,
-        `  Precio base: ${moneda(
-          precio,
-        )}`,
-        descuento > 0
-          ? `  Descuento: -${moneda(
-              descuento,
-            )}`
-          : null,
-        `  IVA / impuesto: ${moneda(
-          impuesto,
-        )}`,
-        `  Total línea: ${moneda(
-          subtotal,
-        )}`,
-      ]
-        .filter(Boolean)
-        .join('\n');
-    });
-
-    if (canal === 'SMS') {
-      const saldoPlano =
-        Math.round(
-          Number(resumen.saldo || 0),
-        ).toString();
-
-      return [
-        `Sertiva ${numero}.`,
-        `Saldo ${saldoPlano} COP.`,
-        `Pagar: ${checkoutUrlPago}`,
-      ].join(' ');
+  const descargarFacturaPdf = async (factura: Factura) => {
+    try {
+      const { data } = await api.get<Blob>(`/pagos/factura/${factura.id}/pdf`, { responseType: 'blob' });
+      const url = URL.createObjectURL(data);
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = `factura-${factura.id}.pdf`;
+      enlace.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      await feedback.error('No se pudo descargar el PDF');
     }
-
-    if (canal === 'WHATSAPP') {
-      return [
-        `Hola ${factura.clienteNombre}.`,
-        '',
-        `Te compartimos la solicitud de pago de *${numero}*.`,
-        '',
-        '*DETALLE DE LA COMPRA*',
-        '',
-        ...productos,
-        '',
-        `Subtotal antes de descuentos e impuestos: ${moneda(
-          resumen.bruto,
-        )}`,
-        resumen.descuentos > 0
-          ? `Descuentos: -${moneda(
-              resumen.descuentos,
-            )}`
-          : null,
-        `IVA / impuestos: ${moneda(
-          resumen.impuestos,
-        )}`,
-        `Total factura: ${moneda(
-          resumen.total,
-        )}`,
-        `*Saldo a pagar: ${moneda(
-          resumen.saldo,
-        )}*`,
-        '',
-        'Puedes realizar el pago de forma segura aquí:',
-        checkoutUrlPago,
-        '',
-        'Sertiva',
-      ]
-        .filter(
-          (linea) =>
-            linea !== null &&
-            linea !== undefined,
-        )
-        .join('\n');
-    }
-
-    return [
-      `Hola ${factura.clienteNombre},`,
-      '',
-      `Te enviamos la solicitud de pago correspondiente a ${numero}.`,
-      '',
-      'DETALLE DE LA COMPRA',
-      '',
-      ...productos,
-      '',
-      `Subtotal antes de descuentos e impuestos: ${moneda(
-        resumen.bruto,
-      )}`,
-      resumen.descuentos > 0
-        ? `Descuentos: -${moneda(
-            resumen.descuentos,
-          )}`
-        : null,
-      `IVA / impuestos: ${moneda(
-        resumen.impuestos,
-      )}`,
-      `Total factura: ${moneda(
-        resumen.total,
-      )}`,
-      `Saldo pendiente: ${moneda(
-        resumen.saldo,
-      )}`,
-      '',
-      'PAGAR AHORA:',
-      checkoutUrlPago,
-      '',
-      'Este enlace te llevará directamente al checkout seguro de Mercado Pago.',
-      '',
-      'Sertiva',
-    ]
-      .filter(
-        (linea) =>
-          linea !== null &&
-          linea !== undefined,
-      )
-      .join('\n');
   };
 
   const normalizarTelefono = (
@@ -738,12 +555,6 @@ export default function Facturas() {
         usarCorreoRegistrado
           ? correoRegistrado
           : correoAlternativoPago.trim();
-
-      const mensaje =
-        construirMensajePago(
-          facturaLinkPago,
-          canalPago,
-        );
 
       try {
         setEnviandoSolicitudPago(true);
@@ -792,47 +603,20 @@ export default function Facturas() {
               : `+${telefono}`;
         }
 
-        const asunto =
-          `Solicitud de pago ${
-            facturaLinkPago.numeroFactura ??
-            `Factura #${facturaLinkPago.id}`
-          }`;
-
-        const { data: resultado } =
-          await api.post(
-            '/notificaciones/enviar-canal',
-            {
-              canal: canalPago,
-              destinatario,
-              nombreDestinatario:
-                facturaLinkPago.clienteNombre,
-              asunto:
-                canalPago === 'CORREO'
-                  ? asunto
-                  : undefined,
-              mensaje,
-            },
-          );
-
-        await feedback.exito(
-          'Solicitud de pago enviada',
-          canalPago === 'CORREO'
-            ? `El detalle, IVA y link de pago se enviaron por correo a ${destinatario}.`
-            : canalPago === 'WHATSAPP'
-              ? `El detalle, IVA y link de pago se enviaron por WhatsApp a ${destinatario}.`
-              : `El resumen y link de pago se enviaron por SMS a ${destinatario}.`,
-        );
-
-        if (
-          resultado?.proveedorId ||
-          resultado?.estado
-        ) {
-          await queryClient.invalidateQueries({
-            queryKey: [
-              'notificaciones-historial',
-            ],
+        if (canalPago === 'CORREO') {
+          await api.post(`/pagos/checkout/${facturaLinkPago.id}/correo`, { correo: destinatario });
+        } else {
+          await api.post('/notificaciones/enviar-canal', {
+            canal: canalPago,
+            destinatario,
+            nombreDestinatario: facturaLinkPago.clienteNombre,
+            mensaje: construirMensajePago(facturaLinkPago),
           });
         }
+
+        await feedback.exito('Solicitud de pago enviada', `El enlace se envió a ${destinatario}.`);
+        cerrarLinkPago();
+        await queryClient.invalidateQueries({ queryKey: ['notificaciones-historial'] });
       } catch (error: any) {
         // El interceptor conserva el detalle técnico en consola.
         // Aquí mostramos únicamente un mensaje comprensible para el usuario.
@@ -1869,6 +1653,11 @@ export default function Facturas() {
               />
             </div>
 
+            <button type="button" onClick={() => { void descargarFacturaPdf(detalleFactura); }}
+              className="mt-4 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-ink">
+              Descargar PDF
+            </button>
+
             <h3 className="mt-6 font-semibold text-[#10274d]">
               Productos facturados
             </h3>
@@ -1999,324 +1788,48 @@ export default function Facturas() {
         )}
 
       {facturaLinkPago && (
-        <Modal
-          title="Enviar solicitud de pago"
-          size="max-w-5xl"
-          onClose={cerrarLinkPago}
-        >
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.25fr_.75fr]">
-            <div>
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#254a7e]">
-                  Solicitud de pago
-                </p>
-
-                <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-[#10274d]">
-                      {facturaLinkPago.numeroFactura ??
-                        `Factura #${facturaLinkPago.id}`}
-                    </h3>
-                    <p className="mt-1 text-sm text-slate-600">
-                      {facturaLinkPago.clienteNombre}
-                    </p>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="text-xs uppercase text-slate-500">
-                      Saldo a pagar
-                    </p>
-                    <p className="text-2xl font-bold text-[#254a7e]">
-                      {moneda(
-                        Number(
-                          facturaLinkPago.saldoPendiente ??
-                            0,
-                        ),
-                      )}
-                    </p>
-                  </div>
-                </div>
+        <Modal title="Enviar enlace de pago" onClose={cerrarLinkPago}>
+          <div className="space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#edf3fa] p-4">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-ink">{facturaLinkPago.numeroFactura ?? `Factura #${facturaLinkPago.id}`}</h3>
+                <p className="break-words text-sm text-slate-600">{facturaLinkPago.clienteNombre}</p>
               </div>
-
-              <h3 className="mt-6 font-semibold text-[#10274d]">
-                Detalle que recibirá el cliente
-              </h3>
-
-              <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200">
-                <table className="w-full min-w-[760px] text-sm">
-                  <thead>
-                    <tr className="bg-slate-50 text-left text-xs uppercase text-slate-500">
-                      <th className="px-3 py-3">Producto</th>
-                      <th className="px-3 py-3">Cant.</th>
-                      <th className="px-3 py-3">Precio base</th>
-                      <th className="px-3 py-3">Descuento</th>
-                      <th className="px-3 py-3">IVA / impuesto</th>
-                      <th className="px-3 py-3 text-right">Total</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {(facturaLinkPago.items ?? []).map(
-                      (item: any) => (
-                        <tr
-                          key={item.id}
-                          className="border-t border-slate-100"
-                        >
-                          <td className="px-3 py-3">
-                            <p className="font-semibold text-[#10274d]">
-                              {item.nombreProducto}
-                            </p>
-                            {item.referencia && (
-                              <p className="text-xs text-slate-500">
-                                Ref. {item.referencia}
-                              </p>
-                            )}
-                          </td>
-
-                          <td className="px-3 py-3">
-                            {Number(item.cantidad)}
-                          </td>
-
-                          <td className="px-3 py-3">
-                            {moneda(
-                              Number(
-                                item.precioUnitario,
-                              ),
-                            )}
-                          </td>
-
-                          <td className="px-3 py-3">
-                            {Number(
-                              item.descuento ?? 0,
-                            ) > 0
-                              ? `-${moneda(
-                                  Number(
-                                    item.descuento,
-                                  ),
-                                )}`
-                              : moneda(0)}
-                          </td>
-
-                          <td className="px-3 py-3 font-medium text-amber-700">
-                            {moneda(
-                              Number(
-                                item.impuesto ?? 0,
-                              ),
-                            )}
-                          </td>
-
-                          <td className="px-3 py-3 text-right font-semibold">
-                            {moneda(
-                              Number(
-                                item.subtotal ?? 0,
-                              ),
-                            )}
-                          </td>
-                        </tr>
-                      ),
-                    )}
-                  </tbody>
-                </table>
+              <div>
+                <p className="text-xs text-slate-600">Saldo a pagar</p>
+                <p className="text-xl font-bold text-ink">{moneda(Number(facturaLinkPago.saldoPendiente))}</p>
               </div>
-
-              {(() => {
-                const resumen =
-                  resumenPago(
-                    facturaLinkPago,
-                  );
-
-                return (
-                  <div className="mt-4 ml-auto max-w-sm rounded-xl bg-slate-50 p-4">
-                    <div className="flex justify-between py-1 text-sm">
-                      <span className="text-slate-500">Subtotal bruto</span>
-                      <span>{moneda(resumen.bruto)}</span>
-                    </div>
-
-                    <div className="flex justify-between py-1 text-sm">
-                      <span className="text-slate-500">Descuentos</span>
-                      <span>-{moneda(resumen.descuentos)}</span>
-                    </div>
-
-                    <div className="flex justify-between py-1 text-sm">
-                      <span className="text-slate-500">IVA / impuestos</span>
-                      <span className="font-semibold text-amber-700">
-                        {moneda(resumen.impuestos)}
-                      </span>
-                    </div>
-
-                    <div className="mt-2 flex justify-between border-t border-slate-200 pt-3 font-semibold">
-                      <span>Total factura</span>
-                      <span>{moneda(resumen.total)}</span>
-                    </div>
-
-                    <div className="mt-2 flex justify-between rounded-lg bg-[#254a7e] px-3 py-2 font-semibold text-white">
-                      <span>Saldo a pagar</span>
-                      <span>{moneda(resumen.saldo)}</span>
-                    </div>
-                  </div>
-                );
-              })()}
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Canal de envío
-              </p>
+            <label className="block text-sm font-semibold text-ink">
+              Canal de envío
+              <select value={canalPago} onChange={e => setCanalPago(e.target.value as typeof canalPago)}
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <option value="CORREO">Correo</option>
+                <option value="WHATSAPP">WhatsApp</option>
+                <option value="SMS">SMS</option>
+              </select>
+            </label>
 
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                {(
-                  [
-                    'CORREO',
-                    'WHATSAPP',
-                    'SMS',
-                  ] as const
-                ).map((canal) => (
-                  <button
-                    key={canal}
-                    type="button"
-                    onClick={() =>
-                      setCanalPago(canal)
-                    }
-                    className={`rounded-xl border px-3 py-3 text-xs font-semibold ${
-                      canalPago === canal
-                        ? 'border-[#254a7e] bg-blue-50 text-[#254a7e]'
-                        : 'border-slate-200 text-slate-500'
-                    }`}
-                  >
-                    {canal === 'CORREO'
-                      ? 'Correo'
-                      : canal === 'WHATSAPP'
-                        ? 'WhatsApp'
-                        : 'SMS'}
-                  </button>
-                ))}
-              </div>
+            {canalPago === 'CORREO' ? (
+              <label className="block text-sm font-semibold text-ink">
+                Correo del destinatario
+                <input type="email" autoComplete="email" placeholder="correo@dominio.com"
+                  value={usarCorreoRegistrado ? facturaLinkPago.cliente?.correo ?? '' : correoAlternativoPago}
+                  onChange={e => { setUsarCorreoRegistrado(false); setCorreoAlternativoPago(e.target.value); }}
+                  className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2.5 font-normal" />
+                <span className="mt-1 block text-xs font-normal text-slate-600">El PDF se enviará a este correo cuando se confirme el pago total.</span>
+              </label>
+            ) : (
+              <p className="text-sm text-slate-600">Teléfono del cliente · {facturaLinkPago.cliente?.telefono || 'Sin teléfono registrado'}</p>
+            )}
 
-              <div className="mt-5">
-                <p className="text-xs uppercase text-slate-500">
-                  Destinatario
-                </p>
-
-                <p className="mt-1 font-semibold text-[#10274d]">
-                  {facturaLinkPago.clienteNombre}
-                </p>
-
-                {canalPago === 'CORREO' ? (
-                  <div className="mt-2 space-y-3">
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs uppercase text-slate-500">
-                        Correo registrado
-                      </p>
-                      <p className="mt-1 text-sm font-medium text-[#10274d]">
-                        {facturaLinkPago.cliente?.correo ||
-                          'Sin correo registrado'}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUsarCorreoRegistrado(true);
-                          setCorreoAlternativoPago('');
-                        }}
-                        className={`rounded-xl border px-3 py-2 text-xs font-semibold ${
-                          usarCorreoRegistrado
-                            ? 'border-[#254a7e] bg-blue-50 text-[#254a7e]'
-                            : 'border-slate-200 text-slate-500'
-                        }`}
-                      >
-                        Usar este correo
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setUsarCorreoRegistrado(false)
-                        }
-                        className={`rounded-xl border px-3 py-2 text-xs font-semibold ${
-                          !usarCorreoRegistrado
-                            ? 'border-[#254a7e] bg-blue-50 text-[#254a7e]'
-                            : 'border-slate-200 text-slate-500'
-                        }`}
-                      >
-                        Escribir otro
-                      </button>
-                    </div>
-
-                    {!usarCorreoRegistrado && (
-                      <div>
-                        <label className="mb-1.5 block text-xs font-medium text-slate-600">
-                          Correo destinatario
-                        </label>
-                        <input
-                          type="email"
-                          value={correoAlternativoPago}
-                          onChange={(e) =>
-                            setCorreoAlternativoPago(
-                              e.target.value,
-                            )
-                          }
-                          placeholder="correo@dominio.com"
-                          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-[#254a7e]"
-                        />
-                        <p className="mt-1 text-[11px] leading-4 text-slate-400">
-                          La solicitud se enviará únicamente a este correo.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="mt-1 text-sm text-slate-500">
-                    {facturaLinkPago.cliente?.telefono ||
-                      'Sin teléfono registrado'}
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-5">
-                <p className="text-xs uppercase text-slate-500">
-                  Vista previa del mensaje
-                </p>
-
-                <div className="mt-2 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-xs leading-5 text-slate-600">
-                  {construirMensajePago(
-                    facturaLinkPago,
-                    canalPago,
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs leading-5 text-emerald-800">
-                Sertiva enviará directamente el detalle de la factura, IVA, saldo y enlace seguro de Mercado Pago por el canal seleccionado.
-              </div>
-
-              <button
-                type="button"
-                disabled={enviandoSolicitudPago}
-                onClick={enviarSolicitudPago}
-                className="mt-5 w-full rounded-xl bg-[#254a7e] px-5 py-3 font-semibold text-white disabled:opacity-50"
-              >
-                {enviandoSolicitudPago
-                  ? 'Preparando envío...'
-                  : canalPago === 'CORREO'
-                    ? 'Enviar correo con link de pago'
-                    : canalPago === 'WHATSAPP'
-                      ? 'Enviar la notificación por WhatsApp'
-                      : 'Enviar la notificación por SMS'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  window.open(
-                    checkoutUrlPago,
-                    '_blank',
-                  )
-                }
-                className="mt-2 w-full rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600"
-              >
-                Probar link de pago
+            <div className="flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+              {checkoutUrlPago && <a href={checkoutUrlPago} target="_blank" rel="noreferrer"
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-ink">Abrir enlace</a>}
+              <button type="button" onClick={enviarSolicitudPago} disabled={enviandoSolicitudPago || !checkoutUrlPago}
+                className="rounded-xl bg-[#254a7e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">
+                {enviandoSolicitudPago ? 'Enviando…' : 'Enviar enlace'}
               </button>
             </div>
           </div>
@@ -2561,7 +2074,8 @@ function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
       <div
-        className={`max-h-[92vh] w-full ${size} overflow-y-auto rounded-2xl bg-white shadow-2xl`}
+        role="dialog" aria-modal="true" aria-label={title}
+        className={`max-h-[92dvh] w-full ${size} overflow-y-auto rounded-2xl bg-white shadow-2xl`}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
           <h2 className="text-xl font-semibold text-[#10274d]">
@@ -2571,6 +2085,7 @@ function Modal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="h-9 w-9 rounded-lg text-xl text-slate-400 hover:bg-slate-100"
           >
             ×
@@ -2673,7 +2188,8 @@ function moneda(value: number) {
     {
       style: 'currency',
       currency: 'COP',
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     },
   ).format(
     Number(value || 0),

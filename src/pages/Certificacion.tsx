@@ -48,6 +48,7 @@ export default function Certificacion() {
       'INVENTARIO',
     );
 
+  const [metodoFirma, setMetodoFirma] = useState('CODIGO');
   const [uso, setUso] =
     useState<Uso>(
       'CLIENTE',
@@ -348,6 +349,7 @@ export default function Certificacion() {
               tipoCertificacion:
                 tipo,
               uso,
+              metodoFirma,
               observacion:
                 observacion ||
                 undefined,
@@ -1066,6 +1068,16 @@ export default function Certificacion() {
             2. Destinatario y firma
           </h2>
 
+          <label className="mt-4 block text-sm font-medium text-slate-700">
+            Método de firma
+            <select value={metodoFirma} onChange={(e) => setMetodoFirma(e.target.value)}
+              className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3">
+              <option value="CODIGO">Código de verificación de 6 dígitos</option>
+              <option value="CODIGO_GRAFICA">Código de verificación + firma dibujada o subida</option>
+              <option value="CODIGO_FACIAL" disabled>Código de verificación + facial (pendiente)</option>
+              <option value="FACIAL" disabled>Solo facial (pendiente)</option>
+            </select>
+          </label>
           <div className="mt-4 grid grid-cols-2 gap-3">
             {(
               [

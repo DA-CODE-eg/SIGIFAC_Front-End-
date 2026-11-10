@@ -1,3 +1,5 @@
+import FirmaGrafica from '../components/FirmaGrafica';
+import { isAxiosError } from 'axios';
 import Marca from '../components/Marca';
 import {
   useEffect,
@@ -39,6 +41,7 @@ export default function CertificarPublico() {
   ] = useState('');
   const [acepta, setAcepta] =
     useState(false);
+  const [firmaGrafica, setFirmaGrafica] = useState('');
   const [resultado, setResultado] =
     useState<any>(null);
 
@@ -74,6 +77,8 @@ export default function CertificarPublico() {
       []
     );
   }, [data]);
+
+  const requiereGrafica = data?.metodoFirma === 'CODIGO_GRAFICA';
 
   const enviarOtp =
     useMutation({
@@ -116,6 +121,7 @@ export default function CertificarPublico() {
                 nombre,
               identificacion,
               acepta,
+              ...(requiereGrafica ? { firmaGrafica } : {}),
             },
           )
         ).data,
@@ -249,9 +255,10 @@ export default function CertificarPublico() {
                 }
                 className="rounded-xl bg-[#254a7e] px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
-                Firmar documento
+                Enviar código de verificación
               </button>
             </div>
+            {enviarOtp.isError && <p role="alert" className="mt-2 text-sm text-red-700">No se pudo enviar el código de verificación.</p>}
           </section>
         )}
 
@@ -266,10 +273,12 @@ export default function CertificarPublico() {
             </h2>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Te enviamos un código OTP de 6 dígitos a <strong>{data.destinatario}</strong>. Ingrésalo para continuar.
+              Te enviamos un código de verificación de 6 dígitos a <strong>{data.destinatario}</strong>. Ingrésalo para continuar.
             </p>
 
             <input
+              aria-label="Código de verificación"
+              autoComplete="one-time-code"
               inputMode="numeric"
               maxLength={6}
               value={otp}
@@ -303,6 +312,12 @@ export default function CertificarPublico() {
             >
               Validar código
             </button>
+            {validarOtp.isError && <p role="alert" className="mt-3 text-sm text-red-700">El código es incorrecto o venció.</p>}
+            <button type="button" disabled={enviarOtp.isPending || validarOtp.isPending} onClick={() => enviarOtp.mutate()}
+              className="mt-4 text-sm font-medium text-[#254a7e] underline disabled:opacity-50">
+              Enviar un nuevo código
+            </button>
+            {enviarOtp.isError && <p role="alert" className="mt-2 text-sm text-red-700">No se pudo enviar el código.</p>}
           </section>
         )}
 
@@ -339,6 +354,8 @@ export default function CertificarPublico() {
               />
             </div>
 
+            {requiereGrafica && <FirmaGrafica value={firmaGrafica} onChange={setFirmaGrafica} />}
+
             <label className="mt-5 flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
               <input
                 type="checkbox"
@@ -361,6 +378,7 @@ export default function CertificarPublico() {
                 !nombre.trim() ||
                 !identificacion.trim() ||
                 !acepta ||
+                (requiereGrafica && !firmaGrafica) ||
                 firmar.isPending
               }
               onClick={() =>
@@ -373,7 +391,8 @@ export default function CertificarPublico() {
 
             {firmar.isError && (
               <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                No fue posible validar tu identidad con la información registrada para esta solicitud.
+                {isAxiosError(firmar.error) && typeof firmar.error.response?.data?.message === 'string'
+                  ? firmar.error.response.data.message : 'No fue posible completar la firma.'}
               </p>
             )}
           </section>
@@ -617,7 +636,7 @@ function EstadoPaso({
     paso === 'DOCUMENTO'
       ? 'Revisión'
       : paso === 'OTP'
-        ? 'Validación OTP'
+        ? 'Código de verificación'
         : paso === 'IDENTIDAD'
           ? 'Identificación'
           : 'Firmado';
