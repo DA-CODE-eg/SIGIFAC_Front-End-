@@ -98,6 +98,8 @@ api.interceptors.response.use(
       useUiStore.getState().terminarPeticion();
     }
 
+    if (axios.isCancel(error)) return Promise.reject(error);
+
     const status = error?.response?.status;
 
     // El detalle real permanece disponible para desarrollo/diagnóstico.

@@ -21,6 +21,7 @@ export interface UsuarioSesion {
   empresaId: number | null;
   empresa?: EmpresaSesion | null;
   rolEmpresa?: RolEmpresaSesion | null;
+  sede?: { id: number; nombre: string } | null;
   permisos?: string[];
   actingEmpresaId?: number | null;
   modoEmpresa?: boolean;

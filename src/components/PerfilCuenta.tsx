@@ -10,6 +10,7 @@ interface Perfil {
   correo: string;
   foto: string | null;
   nombreUsuario: string | null;
+  sede?: { id: number; nombre: string } | null;
   estado: string;
   fechaCreacion: string | null;
   ultimoIngreso: string | null;
@@ -144,7 +145,7 @@ export default function PerfilCuenta() {
         <dl className="mt-4 grid gap-4 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
           {[
             ['Nombre', nombre], ['Correo', correo], ['Usuario', perfil.data?.nombreUsuario ?? 'Sin asignar'],
-            ['Rol', rol], ['Empresa', empresa], ['Estado', perfil.data?.estado === 'ACTIVO' ? 'Activo' : '—'],
+            ['Rol', rol], ['Empresa', empresa], ['Sede', perfil.data?.sede?.nombre ?? 'Sin asignar'], ['Estado', perfil.data?.estado === 'ACTIVO' ? 'Activo' : '—'],
             ['Cuenta creada', fechaAuditoria(perfil.data?.fechaCreacion)], ['Último ingreso', fechaAuditoria(perfil.data?.ultimoIngreso)],
           ].map(([etiqueta, valor]) => (
             <div key={etiqueta}><dt className="text-slate-500">{etiqueta}</dt><dd className="break-words font-semibold">{valor}</dd></div>

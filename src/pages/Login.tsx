@@ -4,7 +4,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/auth.store';
@@ -21,7 +21,7 @@ declare global {
           appearance?: 'interaction-only';
           callback?: (token: string) => void;
           'expired-callback'?: () => void;
-          'error-callback'?: () => void;
+          'error-callback'?: (codigo: string) => void;
           'timeout-callback'?: () => void;
         },
       ) => string;
@@ -32,6 +32,7 @@ declare global {
 
 export default function Login() {
   const navigate = useNavigate();
+  const verificando = useLocation().pathname === '/login/verificacion';
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const [identificador, setIdentificador] = useState('');
@@ -39,21 +40,23 @@ export default function Login() {
   const [intento, setIntento] = useState<{ identificador: string; contrasena: string }>();
   const [turnstileError, setTurnstileError] = useState('');
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const estabaVerificando = useRef(false);
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim();
 
   const login = useMutation({
-    mutationFn: async (datos: { identificador: string; contrasena: string; turnstileToken: string }) =>
-      (await api.post('/auth/login', datos)).data,
+    mutationFn: async ({ signal, ...datos }: { identificador: string; contrasena: string; turnstileToken: string; signal: AbortSignal }) =>
+      (await api.post('/auth/login', datos, { signal })).data,
     onSuccess: (data) => {
       setAuth(data.token, data.usuario);
-      navigate(data.usuario.rol === 'SUPER_ADMIN' ? '/admin' : '/dashboard');
+      navigate(data.usuario.rol === 'SUPER_ADMIN' ? '/admin' : '/dashboard', { replace: true });
     },
-    onError: () => setIntento(undefined),
   });
   const { mutate } = login;
 
   useEffect(() => {
-    if (!intento || !siteKey) return;
+    if (!verificando || !intento || !siteKey) return;
+
+    const solicitud = new AbortController();
 
     let cancelado = false;
     let enviado = false;
@@ -63,7 +66,7 @@ export default function Login() {
     function fallar(mensaje: string) {
       if (cancelado || enviado) return;
       setTurnstileError(mensaje);
-      setIntento(undefined);
+      enviado = true;
     }
 
     function cargarWidget() {
@@ -81,11 +84,13 @@ export default function Login() {
           callback: (token) => {
             if (cancelado || enviado) return;
             enviado = true;
-            mutate({ ...intento!, turnstileToken: token });
+            mutate({ ...intento!, turnstileToken: token, signal: solicitud.signal });
           },
           'expired-callback': () => fallar('La verificación expiró. Pulsa Entrar de nuevo.'),
           'timeout-callback': () => fallar('La verificación tardó demasiado. Inténtalo de nuevo.'),
-          'error-callback': () => fallar('No se pudo completar la verificación de seguridad.'),
+          'error-callback': (codigo) => fallar(String(codigo) === '110200'
+            ? 'El dominio de Sertiva todavía no está autorizado en Cloudflare Turnstile.'
+            : 'No se pudo completar la verificación de seguridad.'),
         });
       } catch {
         fallar('No se pudo iniciar la verificación de seguridad.');
@@ -112,13 +117,26 @@ export default function Login() {
       if (nuevo) document.head.appendChild(script);
     }
 
+    const limite = window.setTimeout(() => {
+      fallar('La verificación tardó demasiado. Vuelve al inicio de sesión e inténtalo de nuevo.');
+    }, 120000);
     return () => {
+      window.clearTimeout(limite);
+      solicitud.abort();
       cancelado = true;
       script?.removeEventListener('load', cargarWidget);
       script?.removeEventListener('error', errorCarga);
       if (widgetId !== undefined) window.turnstile?.remove?.(widgetId);
     };
-  }, [intento, mutate, siteKey]);
+  }, [intento, mutate, siteKey, verificando]);
+
+  useEffect(() => {
+    if (estabaVerificando.current && !verificando) {
+      setIntento(undefined);
+      setTurnstileError('');
+    }
+    estabaVerificando.current = verificando;
+  }, [verificando]);
 
   const mensajeError = (() => {
     const error = login.error as any;
@@ -136,6 +154,33 @@ export default function Login() {
 
     return 'No fue posible iniciar sesión.';
   })();
+
+  if (verificando) {
+    if (!intento) return <Navigate to="/login" replace />;
+    const error = turnstileError || (login.isError ? mensajeError : '');
+    return (
+      <main className="min-h-screen bg-white px-6 pt-24 text-ink sm:pt-32">
+        <section aria-labelledby="verificacion-titulo" className="mx-auto max-w-xl">
+          <Marca />
+          <h1 id="verificacion-titulo" className="mt-8 text-2xl font-semibold tracking-tight">
+            {error ? 'No pudimos completar el ingreso' : 'Verificación de seguridad en curso'}
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-slate-600" role={error ? 'alert' : 'status'}>
+            {error || (login.isPending
+              ? 'Estamos validando tu acceso a Sertiva.'
+              : 'Estamos comprobando que la solicitud de acceso proviene de una persona. Si aparece un desafío, complétalo para continuar.')}
+          </p>
+          <div ref={turnstileContainerRef} className={error ? 'hidden' : 'mt-5 w-full'} />
+          <button type="button" className="mt-6 text-sm font-semibold text-indigo-800 underline" onClick={() => {
+            setIntento(undefined);
+            setTurnstileError('');
+            login.reset();
+            navigate('/login', { replace: true });
+          }}>{error ? 'Volver al inicio de sesión' : 'Cancelar y volver'}</button>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="grid min-h-screen bg-[#f7f9ff] lg:grid-cols-[1fr_1fr]">
@@ -162,7 +207,7 @@ export default function Login() {
             onSubmit={(e) => {
               e.preventDefault();
 
-              if (intento || login.isPending || !identificador.trim()) return;
+              if (login.isPending || !identificador.trim()) return;
               if (!siteKey) {
                 setTurnstileError('Falta configurar la verificación de seguridad.');
                 return;
@@ -170,6 +215,7 @@ export default function Login() {
               login.reset();
               setTurnstileError('');
               setIntento({ identificador: identificador.trim(), contrasena });
+              navigate('/login/verificacion');
             }}
             className="flex flex-col gap-5"
           >
@@ -186,7 +232,6 @@ export default function Login() {
                   setIdentificador(e.target.value)
                 }
                 autoComplete="username"
-                disabled={Boolean(intento)}
                 required
               />
             </div>
@@ -204,46 +249,14 @@ export default function Login() {
                   setContrasena(e.target.value)
                 }
                 autoComplete="current-password"
-                disabled={Boolean(intento)}
                 required
               />
             </div>
 
-            {(intento || turnstileError) && <div className="space-y-2">
-              {intento && <div ref={turnstileContainerRef} className="w-full" /> }
-
-              {turnstileError && (
-                <p className="text-sm text-red-700">
-                  {turnstileError}
-                </p>
-              )}
-            </div>}
-
-            <button
-              type="submit"
-              disabled={
-                login.isPending || Boolean(intento)
-              }
-              className="mt-1 relative bg-emerald hover:bg-emerald-light text-paper font-medium py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
-            >
-              {login.isPending && (
-                <span className="w-4 h-4 border-2 border-paper/30 border-t-paper rounded-full animate-spin" />
-              )}
-
-              {login.isPending
-                ? 'Validando acceso...'
-                : intento ? 'Verificando seguridad…' : 'Entrar'}
+            {turnstileError && !intento && <p role="alert" className="text-sm text-red-700">{turnstileError}</p>}
+            <button type="submit" className="mt-1 rounded-xl bg-emerald py-3 font-medium text-paper transition-colors hover:bg-emerald-light">
+              Entrar
             </button>
-
-            {intento && !login.isPending && (
-              <button type="button" onClick={() => setIntento(undefined)} className="text-sm text-[#284bc2]">Cancelar verificación</button>
-            )}
-
-            {login.isError && (
-              <p className="text-sm text-red-700">
-                {mensajeError}
-              </p>
-            )}
           </form>
         </div>
       </section>

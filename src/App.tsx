@@ -79,7 +79,7 @@ export default function App() {
         <Route path="/certificar/:token" element={<CertificarPublico />} />
         <Route path="/verificar-certificado/:codigo" element={<VerificarCertificado />} />
         <Route path="/verificar/:codigoQr" element={<Verificar />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login/*" element={<Login />} />
 
         <Route path="/admin" element={<RutaSuperAdmin><AdminDashboard /></RutaSuperAdmin>} />
         <Route path="/admin/empresas" element={<RutaSuperAdmin><AdminEmpresas /></RutaSuperAdmin>} />
