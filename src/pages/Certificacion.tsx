@@ -1,3 +1,4 @@
+import { prepararReferenciaFacial } from '../components/VerificacionFacial';
 import {
   useMemo,
   useState,
@@ -48,7 +49,28 @@ export default function Certificacion() {
       'INVENTARIO',
     );
 
+  const descargarPdfInterno = async (codigo: string) => {
+    try {
+      const { data } = await api.get<Blob>(`/certificacion/certificado/${encodeURIComponent(codigo)}/pdf-interno`, { responseType: 'blob' });
+      const url = URL.createObjectURL(data);
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = 'sertiva-certificado-interno.pdf';
+      enlace.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      await feedback.error('No se pudo descargar la copia interna', 'Confirma que el firmante autorizó conservar su captura facial.');
+    }
+  };
+
   const [metodoFirma, setMetodoFirma] = useState('CODIGO');
+  const [fotoReferencia, setFotoReferencia] = useState<File | null>(null);
+  const [referenciaVerificada, setReferenciaVerificada] = useState(false);
+  const metodoFacial = metodoFirma === 'FACIAL' || metodoFirma === 'CODIGO_FACIAL';
+  const { data: metodosFirma } = useQuery({
+    queryKey: ['metodos-firma', usuario?.id],
+    queryFn: async () => (await api.get<{ facial: boolean }>('/certificacion/firma/metodos')).data,
+  });
   const [uso, setUso] =
     useState<Uso>(
       'CLIENTE',
@@ -341,6 +363,9 @@ export default function Certificacion() {
     useMutation({
       mutationFn:
         async () => {
+          if (metodoFacial && (!fotoReferencia || !referenciaVerificada)) {
+            throw new Error('Adjunta la foto frontal de referencia y confirma cómo verificaste su procedencia.');
+          }
           const contenido =
             await construirContenido();
 
@@ -350,6 +375,7 @@ export default function Certificacion() {
                 tipo,
               uso,
               metodoFirma,
+              ...(metodoFacial && fotoReferencia ? { fotoReferencia: await prepararReferenciaFacial(fotoReferencia), referenciaVerificada } : {}),
               observacion:
                 observacion ||
                 undefined,
@@ -1074,10 +1100,21 @@ export default function Certificacion() {
               className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3">
               <option value="CODIGO">Código de verificación de 6 dígitos</option>
               <option value="CODIGO_GRAFICA">Código de verificación + firma dibujada o subida</option>
-              <option value="CODIGO_FACIAL" disabled>Código de verificación + facial (pendiente)</option>
-              <option value="FACIAL" disabled>Solo facial (pendiente)</option>
+              <option value="CODIGO_FACIAL" disabled={!metodosFirma?.facial}>Código de verificación + facial</option>
+              <option value="FACIAL" disabled={!metodosFirma?.facial}>Solo facial</option>
             </select>
           </label>
+          {metodoFacial && <fieldset className="mt-4 space-y-3 rounded-xl bg-slate-50 p-4 text-sm">
+            <legend className="font-semibold text-ink">Referencia facial del firmante</legend>
+            <label className="block">Foto frontal de referencia (JPG o PNG)
+              <input key={`${uso}-${contactoId}`} type="file" accept="image/jpeg,image/png" className="mt-1 block w-full"
+                onChange={e => { setFotoReferencia(e.target.files?.[0] ?? null); setReferenciaVerificada(false); }} />
+            </label>
+            <label className="flex gap-2">
+              <input type="checkbox" checked={referenciaVerificada} onChange={e => setReferenciaVerificada(e.target.checked)} />
+              <span>Verifiqué la identidad de este firmante y cuento con autorización para usar su foto de referencia en esta solicitud.</span>
+            </label>
+          </fieldset>}
           <div className="mt-4 grid grid-cols-2 gap-3">
             {(
               [
@@ -1093,6 +1130,8 @@ export default function Certificacion() {
                   type="button"
                   onClick={() => {
                     setUso(u);
+                    setFotoReferencia(null);
+                    setReferenciaVerificada(false);
                     setContactoId(
                       '',
                     );
@@ -1119,11 +1158,11 @@ export default function Certificacion() {
               value={
                 contactoId
               }
-              onChange={(e) =>
-                setContactoId(
-                  e.target.value,
-                )
-              }
+              onChange={(e) => {
+                setContactoId(e.target.value);
+                setFotoReferencia(null);
+                setReferenciaVerificada(false);
+              }}
               className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3"
             >
               <option value="">
@@ -1332,6 +1371,13 @@ export default function Certificacion() {
                             Descargar
                           </a>
 
+                          {(usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'SUPER_ADMIN') &&
+                            ['FACIAL', 'CODIGO_FACIAL'].includes(s.contenido?.metodoFirma) && (
+                              <button type="button" onClick={() => { void descargarPdfInterno(s.documentoCertificado.codigoVerificacion ?? s.documentoCertificado.codigoQr); }}
+                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#254a7e]">
+                                PDF interno con foto
+                              </button>
+                            )}
                           <a
                             href={`${window.location.origin}/verificar-certificado/${s.documentoCertificado.codigoVerificacion ?? s.documentoCertificado.codigoQr}`}
                             target="_blank"

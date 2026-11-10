@@ -1,3 +1,4 @@
+import VerificacionFacial from '../components/VerificacionFacial';
 import FirmaGrafica from '../components/FirmaGrafica';
 import { isAxiosError } from 'axios';
 import Marca from '../components/Marca';
@@ -18,6 +19,7 @@ import { api } from '../api/client';
 type Paso =
   | 'DOCUMENTO'
   | 'OTP'
+  | 'FACIAL'
   | 'IDENTIDAD'
   | 'FINAL';
 
@@ -78,6 +80,8 @@ export default function CertificarPublico() {
     );
   }, [data]);
 
+  const soloFacial = data?.metodoFirma === 'FACIAL';
+  const codigoFacial = data?.metodoFirma === 'CODIGO_FACIAL';
   const requiereGrafica = data?.metodoFirma === 'CODIGO_GRAFICA';
 
   const enviarOtp =
@@ -104,7 +108,7 @@ export default function CertificarPublico() {
           r.firmaSession,
         );
         setPaso(
-          'IDENTIDAD',
+          codigoFacial ? 'FACIAL' : 'IDENTIDAD',
         );
       },
     });
@@ -251,11 +255,11 @@ export default function CertificarPublico() {
                   enviarOtp.isPending
                 }
                 onClick={() =>
-                  enviarOtp.mutate()
+                  soloFacial ? setPaso('FACIAL') : enviarOtp.mutate()
                 }
                 className="rounded-xl bg-[#254a7e] px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
-                Enviar código de verificación
+                {soloFacial ? 'Continuar con verificación facial' : 'Enviar código de verificación'}
               </button>
             </div>
             {enviarOtp.isError && <p role="alert" className="mt-2 text-sm text-red-700">No se pudo enviar el código de verificación.</p>}
@@ -321,11 +325,14 @@ export default function CertificarPublico() {
           </section>
         )}
 
+        {paso === 'FACIAL' && <VerificacionFacial token={token} sesionCorreo={codigoFacial ? firmaSession : undefined}
+          onSuccess={sesion => { setFirmaSession(sesion); setPaso('IDENTIDAD'); }} />}
+
         {paso ===
           'IDENTIDAD' && (
           <section className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
             <div className="mb-5 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              Correo validado
+              {soloFacial ? 'Rostro verificado' : codigoFacial ? 'Correo y rostro verificados' : 'Correo validado'}
             </div>
 
             <h2 className="text-2xl font-semibold text-[#10274d]">
@@ -637,6 +644,8 @@ function EstadoPaso({
       ? 'Revisión'
       : paso === 'OTP'
         ? 'Código de verificación'
+        : paso === 'FACIAL'
+          ? 'Verificación facial'
         : paso === 'IDENTIDAD'
           ? 'Identificación'
           : 'Firmado';
