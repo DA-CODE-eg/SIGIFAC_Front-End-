@@ -16,6 +16,7 @@ const CertificarPublico = lazy(() => import('./pages/CertificarPublico'));
 const Clientes = lazy(() => import('./pages/Clientes'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Facturas = lazy(() => import('./pages/Facturas'));
+const InventarioSedes = lazy(() => import('./pages/InventarioSedes'));
 const Inventario = lazy(() => import('./pages/Inventario'));
 const Login = lazy(() => import('./pages/Login'));
 const Notificaciones = lazy(() => import('./pages/Notificaciones'));
@@ -86,6 +87,7 @@ export default function App() {
 
         <Route path="/dashboard" element={<RutaTenant permiso="DASHBOARD_VER"><Dashboard /></RutaTenant>} />
         <Route path="/productos" element={<RutaTenant permiso="PRODUCTOS_VER"><Productos /></RutaTenant>} />
+        <Route path="/inventario/sedes" element={<RutaTenant permiso="INVENTARIOS_VER"><InventarioSedes /></RutaTenant>} />
         <Route path="/inventario" element={<RutaTenant permiso="INVENTARIOS_VER"><Inventario /></RutaTenant>} />
         <Route path="/carga-masiva" element={<RutaTenant permiso="CARGA_MASIVA"><CargaMasiva /></RutaTenant>} />
         <Route path="/clientes" element={<RutaTenant permiso="CLIENTES_VER"><Clientes /></RutaTenant>} />

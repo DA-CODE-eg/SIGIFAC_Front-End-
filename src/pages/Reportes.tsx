@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { empresaEfectivaId } from '../lib/permisos';
+import { useAuthStore } from '../store/auth.store';
 import { feedback } from '../lib/feedback';
 
 type Formato = 'XLSX' | 'CSV' | 'PDF';
@@ -9,9 +12,28 @@ interface Reporte {
   tipo: string;
   nombre: string;
   grupo: string;
+  admiteSede?: boolean;
 }
 
+type Resumen = {
+  total: number;
+  gruposTotales: number;
+  unidad?: string;
+  etiqueta: string;
+  comparativo: string | null;
+  serie: { etiqueta: string; valor: number; comparativo: number }[];
+  muestra: Record<string, string | number>[];
+};
+
+const filtro = 'mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm';
+const formatoNumero = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 3 });
+
 export default function Reportes() {
+  const empresaId = useAuthStore((s) => empresaEfectivaId(s.usuario));
+  const [tipo, setTipo] = useState('EXISTENCIAS_SEDES');
+  const [sedeId, setSedeId] = useState('');
+  const [desde, setDesde] = useState('');
+  const [hasta, setHasta] = useState('');
   const [buscar, setBuscar] = useState('');
   const [formato, setFormato] =
     useState<Formato>('XLSX');
@@ -19,10 +41,30 @@ export default function Reportes() {
     useState<string | null>(null);
 
   const { data: catalogo = [] } = useQuery<Reporte[]>({
-    queryKey: ['reportes-catalogo'],
+    queryKey: ['reportes-catalogo', empresaId],
     queryFn: async () =>
       (await api.get('/reportes/catalogo')).data,
   });
+
+  const seleccionado = catalogo.find((item) => item.tipo === tipo);
+  const params = {
+    tipo, sedeId: seleccionado?.admiteSede ? sedeId || undefined : undefined,
+    desde: tipo === 'EXISTENCIAS_SEDES' ? undefined : desde || undefined,
+    hasta: tipo === 'EXISTENCIAS_SEDES' ? undefined : hasta || undefined,
+  };
+  const fechasValidas = !params.desde || !params.hasta || params.desde <= params.hasta;
+  const { data: sedes = [] } = useQuery({
+    queryKey: ['reportes-sedes', empresaId],
+    queryFn: async () => (await api.get<{ id: number; nombre: string }[]>('/reportes/sedes')).data,
+    enabled: !!seleccionado?.admiteSede,
+  });
+  const resumen = useQuery({
+    queryKey: ['reportes-resumen', empresaId, params],
+    queryFn: async () => (await api.get<Resumen>('/reportes/resumen', { params })).data,
+    enabled: !!seleccionado && fechasValidas,
+  });
+  const muestra = resumen.data?.muestra ?? [];
+  const columnas = muestra[0] ? Object.keys(muestra[0]) : [];
 
   const filtrados = useMemo(() => {
     const q = buscar.trim().toLowerCase();
@@ -43,7 +85,7 @@ export default function Reportes() {
     [filtrados],
   );
 
-  const descargar = async (reporte: Reporte) => {
+  const descargar = async (reporte: Reporte, usarFiltros = false) => {
     try {
       setDescargando(reporte.tipo);
 
@@ -51,6 +93,7 @@ export default function Reportes() {
         '/reportes/exportar',
         {
           params: {
+            ...(usarFiltros ? params : {}),
             tipo: reporte.tipo,
             formato,
           },
@@ -67,7 +110,7 @@ export default function Reportes() {
       const extension = formato.toLowerCase();
       const filename =
         match?.[1] ??
-        `sigifac_${reporte.tipo.toLowerCase()}.${extension}`;
+        `sertiva_${reporte.tipo.toLowerCase()}.${extension}`;
 
       const blob = new Blob([data]);
       const url = URL.createObjectURL(blob);
@@ -83,6 +126,8 @@ export default function Reportes() {
         'Reporte generado',
         `${reporte.nombre} se descargó correctamente.`,
       );
+    } catch {
+      // La API muestra el error de descarga.
     } finally {
       setDescargando(null);
     }
@@ -126,6 +171,54 @@ export default function Reportes() {
           </div>
         </div>
       </div>
+
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
+        <div><h2 className="text-lg font-semibold">Centro de reportes</h2><p className="mt-1 text-sm text-slate-600">El filtro por sede está disponible para existencias, traslados, conteos y kárdex. Los demás reportes abarcan toda la empresa.</p></div>
+        <div className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <label className="text-sm">Reporte<select className={filtro} value={tipo} onChange={(evento) => { setTipo(evento.target.value); setSedeId(''); }}>
+            {catalogo.map((item) => <option key={item.tipo} value={item.tipo}>{item.nombre}</option>)}
+          </select></label>
+          {seleccionado?.admiteSede && <label className="text-sm">Sede<select className={filtro} value={sedeId} onChange={(evento) => setSedeId(evento.target.value)}>
+            <option value="">Todas las sedes</option>{sedes.map((sede) => <option key={sede.id} value={sede.id}>{sede.nombre}</option>)}
+          </select></label>}
+          {tipo !== 'EXISTENCIAS_SEDES' && <>
+            <label className="text-sm">Desde<input className={filtro} type="date" value={desde} onChange={(evento) => setDesde(evento.target.value)} /></label>
+            <label className="text-sm">Hasta<input className={filtro} type="date" value={hasta} onChange={(evento) => setHasta(evento.target.value)} /></label>
+          </>}
+        </div>
+        {!fechasValidas && <p role="alert" className="text-sm text-red-700">La fecha inicial debe ser anterior o igual a la final.</p>}
+        {seleccionado && fechasValidas && resumen.isPending && <p className="text-sm">Preparando gráfico…</p>}
+        {resumen.isError && <p role="alert" className="text-sm text-red-700">No se pudo generar el reporte.</p>}
+        {resumen.data && <>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{formatoNumero.format(resumen.data.total)} registros {resumen.data.unidad ? '· COP' : ''}</p>
+            {seleccionado && <button type="button" disabled={!!descargando} onClick={() => void descargar(seleccionado, true)} className="rounded-lg bg-[#284bc2] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Exportar con filtros</button>}
+          </div>
+          {resumen.data.serie.length > 0 ? <>
+            <div className="h-72 w-full" aria-label={`Gráfico de ${seleccionado?.nombre ?? tipo}`}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={resumen.data.serie} margin={{ top: 8, left: 16, bottom: 24 }}>
+                  <CartesianGrid vertical={false} strokeDasharray="4 4" />
+                  <XAxis dataKey="etiqueta" tick={{ fontSize: 10 }} />
+                  <YAxis tickFormatter={(valor) => new Intl.NumberFormat('es-CO', { notation: 'compact' }).format(Number(valor))} />
+                  <Tooltip formatter={(valor) => formatoNumero.format(Number(valor))} />
+                  <Legend verticalAlign="top" />
+                  <Bar dataKey="valor" name={resumen.data.etiqueta} fill="#284bc2" radius={[4, 4, 0, 0]} />
+                  {resumen.data.comparativo && <Bar dataKey="comparativo" name={resumen.data.comparativo} fill="#7955c7" radius={[4, 4, 0, 0]} />}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            {resumen.data.gruposTotales > resumen.data.serie.length && <p className="text-xs text-slate-500">El gráfico muestra {resumen.data.serie.length} de {resumen.data.gruposTotales} grupos. La exportación incluye todos los registros filtrados.</p>}
+          </> : <p className="text-sm text-slate-600">No hay datos para graficar con estos filtros.</p>}
+          {!!muestra.length && <details className="rounded-xl border border-slate-200 p-3">
+            <summary className="cursor-pointer font-semibold text-indigo-800">Ver detalle · hasta 25 filas</summary>
+            <div className="mt-2 overflow-x-auto"><table className="w-full min-w-max text-left text-sm">
+              <thead className="bg-slate-50"><tr>{columnas.map((columna) => <th key={columna} scope="col" className="px-3 py-2">{columna}</th>)}</tr></thead>
+              <tbody>{muestra.map((fila, indice) => <tr key={indice} className="border-t border-slate-100">{columnas.map((columna) => <td key={columna} className="max-w-64 break-words px-3 py-2">{String(fila[columna] ?? '—')}</td>)}</tr>)}</tbody>
+            </table></div>
+          </details>}
+        </>}
+      </section>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <input
@@ -202,6 +295,11 @@ export default function Reportes() {
 
 function descripcion(tipo: string) {
   const descripciones: Record<string, string> = {
+    EXISTENCIAS_SEDES: 'Saldo disponible por sede, bodega y lote.',
+    TRASLADOS: 'Despachos, recepciones, mercancía en tránsito y diferencias.',
+    CONTEOS: 'Cantidad esperada, conteo físico y conciliación.',
+    KARDEX_SEDES: 'Entradas, salidas y ajustes con saldos anteriores y nuevos.',
+
     INVENTARIO:
       'Existencias, inventario, categorías, proveedores y estado de los productos.',
     PRODUCTOS:

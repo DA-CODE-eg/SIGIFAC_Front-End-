@@ -139,6 +139,7 @@ export default function Inventario() {
         </div>
         <div className="flex flex-wrap gap-2">
           {tienePermiso(usuario, 'PRODUCTOS_VER') && <Link className={enlace} to="/productos">Catálogo</Link>}
+          <Link className={enlace} to="/inventario/sedes">Sedes y bodegas</Link>
           {tienePermiso(usuario, 'CARGA_MASIVA') && <Link className={enlace} to="/carga-masiva">Carga masiva</Link>}
           {tienePermiso(usuario, 'INVENTARIOS_CREAR') && <button className={boton} onClick={() => { crearCategoria.reset(); setNuevaCategoria(!nuevaCategoria); }}>Nueva categoría</button>}
         </div>

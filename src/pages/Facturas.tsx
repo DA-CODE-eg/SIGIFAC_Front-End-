@@ -235,7 +235,7 @@ export default function Facturas() {
               'REGISTRO_ENTIDAD' &&
             producto.activo !== false &&
             Number(
-              producto.cantidad ?? 0,
+              producto.cantidadPrincipal ?? producto.cantidad ?? 0,
             ) > 0,
         )
         .map((producto: any) => ({
@@ -252,7 +252,7 @@ export default function Facturas() {
             producto.referencia ?? '',
           ),
           cantidad: Number(
-            producto.cantidad ?? 0,
+            producto.cantidadPrincipal ?? producto.cantidad ?? 0,
           ),
           precio: Number(
             producto.precio ?? 0,
@@ -1530,7 +1530,7 @@ export default function Facturas() {
                                 )}
                               </p>
                               <p className="text-xs text-slate-500">
-                                Stock{' '}
+                                Bodega principal sin lote:{' '}
                                 {
                                   producto.cantidad
                                 }
