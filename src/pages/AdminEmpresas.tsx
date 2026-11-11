@@ -31,6 +31,7 @@ export default function AdminEmpresas() {
   const [nombreAdmin, setNombreAdmin] = useState('');
   const [correoAdmin, setCorreoAdmin] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [wompiSandbox, setWompiSandbox] = useState(false);
   const [accesoPorUsuario, setAccesoPorUsuario] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState('');
 
@@ -47,6 +48,7 @@ export default function AdminEmpresas() {
         tipoEmpresa: 'PEQUENA',
         correoContacto,
         accesoPorUsuario,
+        wompiSandbox,
         administrador: nombreAdmin && correoAdmin && contrasena
           ? {
               nombreCompleto: nombreAdmin,
@@ -66,6 +68,7 @@ export default function AdminEmpresas() {
       setCorreoAdmin('');
       setContrasena('');
       setAccesoPorUsuario(false);
+      setWompiSandbox(false);
       setNombreUsuario('');
       setMostrarFormulario(false);
     },
@@ -158,6 +161,10 @@ export default function AdminEmpresas() {
             <span>Permitir ingreso con nombre de usuario <small className="block text-slate-600">El correo seguirá disponible para iniciar sesión.</small></span>
           </label>
 
+          <label className="mt-3 flex items-start gap-3 rounded-xl bg-indigo-50 p-3 text-sm text-ink">
+            <input className="mt-1" type="checkbox" checked={wompiSandbox} onChange={(e) => setWompiSandbox(e.target.checked)} />
+            <span>Activar Wompi Sandbox <small className="block text-slate-600">Los nuevos enlaces de esta empresa serán de prueba y no moverán dinero real.</small></span>
+          </label>
           <div className="my-6 border-t border-slate-200" />
 
           <div className="mb-4">

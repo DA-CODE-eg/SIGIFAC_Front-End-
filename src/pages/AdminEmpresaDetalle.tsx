@@ -11,6 +11,7 @@ interface Empresa {
   identificacion: string;
   tipoEmpresa: string;
   accesoPorUsuario?: boolean;
+  wompiSandbox?: boolean;
   correoContacto: string;
   estado: string;
   _count?: { usuarios?: number; modulos?: number; inventarios?: number };
@@ -35,6 +36,7 @@ export default function AdminEmpresaDetalle() {
   const [nombreEmpresa, setNombreEmpresa] = useState('');
   const [correoContacto, setCorreoContacto] = useState('');
   const [estado, setEstado] = useState('ACTIVA');
+  const [wompiSandbox, setWompiSandbox] = useState(false);
   const [accesoPorUsuario, setAccesoPorUsuario] = useState(false);
 
   const { data: empresa, isLoading: cargandoEmpresa } = useQuery<Empresa>({
@@ -55,10 +57,11 @@ export default function AdminEmpresaDetalle() {
     setCorreoContacto(empresa.correoContacto);
     setEstado(empresa.estado);
     setAccesoPorUsuario(Boolean(empresa.accesoPorUsuario));
+    setWompiSandbox(Boolean(empresa.wompiSandbox));
   }, [empresa]);
 
   const actualizarEmpresa = useMutation({
-    mutationFn: async () => api.patch(`/admin/empresas/${empresaId}`, { nombreEmpresa, correoContacto, estado, accesoPorUsuario }),
+    mutationFn: async () => api.patch(`/admin/empresas/${empresaId}`, { nombreEmpresa, correoContacto, estado, accesoPorUsuario, wompiSandbox }),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-empresa', empresaId] }),
@@ -149,6 +152,10 @@ export default function AdminEmpresaDetalle() {
           <label className="mt-5 flex items-start gap-3 rounded-xl bg-indigo-50 p-3 text-sm text-ink">
             <input className="mt-1" type="checkbox" checked={accesoPorUsuario} onChange={(e) => setAccesoPorUsuario(e.target.checked)} />
             <span>Permitir ingreso con nombre de usuario <small className="block text-slate-600">Puedes asignar los nombres desde Usuarios en el espacio de la empresa.</small></span>
+          </label>
+          <label className="mt-3 flex items-start gap-3 rounded-xl bg-indigo-50 p-3 text-sm text-ink">
+            <input className="mt-1" type="checkbox" checked={wompiSandbox} onChange={(e) => setWompiSandbox(e.target.checked)} />
+            <span>Activar Wompi Sandbox <small className="block text-slate-600">Los nuevos enlaces de esta empresa serán de prueba y no moverán dinero real.</small></span>
           </label>
           <div className="mt-5 flex justify-end"><button disabled={actualizarEmpresa.isPending} className="rounded-xl bg-[#254a7e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{actualizarEmpresa.isPending ? 'Guardando...' : 'Guardar cambios'}</button></div>
         </form>
