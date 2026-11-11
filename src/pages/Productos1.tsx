@@ -289,7 +289,7 @@ export default function Productos() {
                           type="button"
                           onClick={() => {
                             setProductoEditando(p);
-                            const { foto, ...campos } = p.datos;
+                            const { foto, camposImportados, ...campos } = p.datos;
                             if (p.fichaEstandar) delete campos.cantidad;
                             setDatosEditando(campos);
                           }}

@@ -17,6 +17,7 @@ type Producto = {
     nombre?: string; producto?: string; referencia?: string; cantidad?: number;
     precio?: number; unidad?: string; stockMinimo?: number; ubicacion?: string;
     lote?: string; fechaVencimiento?: string;
+    camposImportados?: { encabezado: string; valor: string | number | boolean }[];
   };
 };
 type Movimiento = {
@@ -349,6 +350,19 @@ function Ficha({ producto, inventarioId, onMovimiento }: {
         ['Stock mínimo', producto.datos.stockMinimo],
       ].map(([etiqueta, valor]) => <div key={etiqueta}><dt className="text-slate-500">{etiqueta}</dt><dd className="font-medium">{valor ?? '—'}</dd></div>)}
     </dl>
+    {Array.isArray(producto.datos.camposImportados) && producto.datos.camposImportados.length > 0 && (
+      <section className="mb-4 rounded-xl border border-slate-200 p-4">
+        <h3 className="font-semibold text-[#10274d]">Datos de la plantilla importada</h3>
+        <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          {producto.datos.camposImportados.map(({ encabezado, valor }) => (
+            <div key={encabezado} className="break-words">
+              <dt className="text-slate-500">{encabezado}</dt>
+              <dd className="font-medium">{typeof valor === 'boolean' ? (valor ? 'Sí' : 'No') : valor}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )}
     <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
       {fotoProducto?.startsWith('data:image/jpeg;base64,') &&
         <img src={fotoProducto} alt={`Foto de ${nombre(producto)}`} className="size-24 rounded-lg object-cover" />}

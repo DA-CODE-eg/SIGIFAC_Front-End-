@@ -52,6 +52,7 @@ export default function CargaMasiva() {
   const [entidadId, setEntidadId] = useState('');
   const [preview, setPreview] = useState<Preview | null>(null);
   const [mapeo, setMapeo] = useState<Record<string, string>>({});
+  const [conservarAdicionales, setConservarAdicionales] = useState(true);
   const [estrategia, setEstrategia] =
     useState<Estrategia>('OMITIR');
   const [resultado, setResultado] = useState<any>(null);
@@ -102,6 +103,7 @@ export default function CargaMasiva() {
     onSuccess: async (data) => {
       setPreview(data);
       setMapeo(data.mapeoSugerido ?? {});
+      setConservarAdicionales(true);
       setResultado(null);
       await feedback.toast(
         data.resumen.conError > 0 ? 'warning' : 'success',
@@ -119,6 +121,7 @@ export default function CargaMasiva() {
           token: preview!.token,
           mapeo,
           estrategiaDuplicado: estrategia,
+          conservarAdicionales,
         })
       ).data,
     onSuccess: async (data) => {
@@ -130,6 +133,8 @@ export default function CargaMasiva() {
         queryClient.invalidateQueries({
           queryKey: ['inventarios'],
         }),
+        queryClient.invalidateQueries({ queryKey: ['categorias-carga-masiva', inventarioId] }),
+        queryClient.invalidateQueries({ queryKey: ['inventario-productos'] }),
         queryClient.invalidateQueries({
           queryKey: ['clientes'],
         }),
@@ -188,10 +193,26 @@ export default function CargaMasiva() {
     setEstrategia('OMITIR');
   };
 
-  const descargarPlantilla = async () => {
+  const origenesMapeados = Object.values(mapeo).filter(Boolean);
+  const columnasAdicionales = preview?.tipo === 'PRODUCTOS'
+    ? preview.columnasOrigen.filter(columna => !origenesMapeados.includes(columna))
+    : [];
+  const mapeoDuplicado = preview?.tipo === 'PRODUCTOS' && new Set(origenesMapeados).size !== origenesMapeados.length;
+  const columnasVista = [
+    ...(preview?.objetivos ?? []).flatMap(objetivo => mapeo[objetivo.campo]
+      ? [{ origen: mapeo[objetivo.campo], etiqueta: objetivo.etiqueta, clave: objetivo.campo }]
+      : []),
+    ...(conservarAdicionales ? columnasAdicionales.map(columna =>
+      ({ origen: columna, etiqueta: columna, clave: `excel:${columna}` })) : []),
+  ];
+  const tienePlantillaImportada = tipo === 'PRODUCTOS' && categorias.some(categoria =>
+    String(categoria.id) === entidadId && categoria.plantillaImportacion);
+
+  const descargarPlantilla = async (formato: 'estandar' | 'importada') => {
     const { data } = await api.get('/carga-masiva/plantilla-excel', {
       params: {
         tipo,
+        formato,
         ...(tipo === 'PRODUCTOS' && entidadId
           ? { entidadId }
           : {}),
@@ -220,7 +241,7 @@ export default function CargaMasiva() {
             .replace(/[^a-z0-9]+/g, '_')}`
         : `plantilla_${tipo.toLowerCase()}`;
 
-    a.download = `${nombreBase}.xlsx`;
+    a.download = `${nombreBase}${formato === 'importada' ? '_importada' : ''}.xlsx`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -262,14 +283,22 @@ export default function CargaMasiva() {
             </h2>
           </div>
 
+          <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={descargarPlantilla}
+            onClick={() => descargarPlantilla('estandar')}
             disabled={tipo === 'PRODUCTOS' && !entidadId}
             className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-[#254a7e] disabled:opacity-40"
           >
-            Descargar plantilla Excel
+            Descargar plantilla estándar
           </button>
+          {tienePlantillaImportada && (
+            <button type="button" onClick={() => descargarPlantilla('importada')}
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-[#254a7e]">
+              Descargar última plantilla importada
+            </button>
+          )}
+          </div>
         </div>
 
         {tipo === 'PRODUCTOS' && (
@@ -455,6 +484,23 @@ export default function CargaMasiva() {
               ))}
             </div>
 
+            {preview.tipo === 'PRODUCTOS' && (
+              <div className="mt-4 rounded-xl border border-slate-200 p-4">
+                <label className="flex items-start gap-2 text-sm font-semibold text-[#10274d]">
+                  <input type="checkbox" checked={conservarAdicionales}
+                    onChange={e => setConservarAdicionales(e.target.checked)} />
+                  Conservar campos adicionales y guardar el formato para esta categoría
+                </label>
+                {columnasAdicionales.length > 0 && (
+                  <p className="mt-2 text-sm text-slate-600">
+                    {conservarAdicionales ? 'Se guardarán en la ficha del producto' : 'Columnas que se omitirán'} · {columnasAdicionales.join(', ')}
+                  </p>
+                )}
+              </div>
+            )}
+            {mapeoDuplicado && <p role="alert" className="mt-4 text-sm text-red-600">
+              Asigna cada columna del archivo a un solo campo de inventario.
+            </p>}
             {erroresMapeo.length > 0 && (
               <p className="mt-4 text-sm text-red-600">
                 Falta mapear: {erroresMapeo.join(', ')}.
@@ -501,17 +547,9 @@ export default function CargaMasiva() {
                 <thead>
                   <tr className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                     <th className="px-3 py-3">Fila</th>
-                    {preview.objetivos
-                      .filter((o) => mapeo[o.campo])
-                      .slice(0, 8)
-                      .map((objetivo) => (
-                        <th
-                          key={objetivo.campo}
-                          className="px-3 py-3"
-                        >
-                          {objetivo.etiqueta}
-                        </th>
-                      ))}
+                    {columnasVista.map(columna => (
+                      <th key={columna.clave} className="whitespace-nowrap px-3 py-3">{columna.etiqueta}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -523,21 +561,11 @@ export default function CargaMasiva() {
                       <td className="px-3 py-3 text-slate-500">
                         {fila.fila}
                       </td>
-                      {preview.objetivos
-                        .filter((o) => mapeo[o.campo])
-                        .slice(0, 8)
-                        .map((objetivo) => (
-                          <td
-                            key={objetivo.campo}
-                            className="px-3 py-3"
-                          >
-                            {String(
-                              fila.interpretada[
-                                objetivo.campo
-                              ] ?? '—',
-                            )}
-                          </td>
-                        ))}
+                      {columnasVista.map(columna => (
+                        <td key={columna.clave} className="min-w-28 px-3 py-3">
+                          {String(fila.original[columna.origen] ?? '—')}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -549,8 +577,7 @@ export default function CargaMasiva() {
                 type="button"
                 onClick={confirmarImportacion}
                 disabled={
-                  erroresMapeo.length > 0 ||
-                  preview.resumen.conError > 0 ||
+                  erroresMapeo.length > 0 || mapeoDuplicado ||
                   confirmar.isPending ||
                   Boolean(resultado)
                 }
