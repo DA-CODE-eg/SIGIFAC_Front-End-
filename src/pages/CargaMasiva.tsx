@@ -52,6 +52,7 @@ export default function CargaMasiva() {
   const [entidadId, setEntidadId] = useState('');
   const [preview, setPreview] = useState<Preview | null>(null);
   const [mapeo, setMapeo] = useState<Record<string, string>>({});
+  const [columnaCategoria, setColumnaCategoria] = useState('');
   const [conservarAdicionales, setConservarAdicionales] = useState(true);
   const [estrategia, setEstrategia] =
     useState<Estrategia>('OMITIR');
@@ -104,6 +105,7 @@ export default function CargaMasiva() {
       setPreview(data);
       setMapeo(data.mapeoSugerido ?? {});
       setConservarAdicionales(true);
+      setColumnaCategoria('');
       setResultado(null);
       await feedback.toast(
         data.resumen.conError > 0 ? 'warning' : 'success',
@@ -122,6 +124,7 @@ export default function CargaMasiva() {
           mapeo,
           estrategiaDuplicado: estrategia,
           conservarAdicionales,
+          columnaCategoria: columnaCategoria || undefined,
         })
       ).data,
     onSuccess: async (data) => {
@@ -486,6 +489,17 @@ export default function CargaMasiva() {
 
             {preview.tipo === 'PRODUCTOS' && (
               <div className="mt-4 rounded-xl border border-slate-200 p-4">
+                <label className="mb-4 block text-sm font-semibold text-[#10274d]">
+                  Categoría de cada producto
+                  <select value={columnaCategoria} onChange={e => setColumnaCategoria(e.target.value)}
+                    className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2">
+                    <option value="">Usar la categoría seleccionada para todo el archivo</option>
+                    {preview.columnasOrigen.map(columna => <option key={columna} value={columna}>{columna}</option>)}
+                  </select>
+                  {columnaCategoria && <span className="mt-1 block font-normal text-slate-600">
+                    Se crearán las categorías nuevas. Las celdas vacías usarán la categoría seleccionada.
+                  </span>}
+                </label>
                 <label className="flex items-start gap-2 text-sm font-semibold text-[#10274d]">
                   <input type="checkbox" checked={conservarAdicionales}
                     onChange={e => setConservarAdicionales(e.target.checked)} />

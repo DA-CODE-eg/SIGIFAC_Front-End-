@@ -7,7 +7,7 @@ interface Proveedor {
   id: number;
   tipo: 'PROVEEDOR' | 'AMBOS';
   tipoIdentificacion?: string | null;
-  numeroIdentificacion: string;
+  numeroIdentificacion: string | null;
   nombreRazonSocial: string;
   nombreContacto?: string | null;
   correo?: string | null;
@@ -75,7 +75,11 @@ export default function Proveedores() {
 
   const editar = useMutation({
     mutationFn: async () =>
-      api.patch(`/contactos/${proveedorEditando.id}`, formEditar),
+      api.patch(`/contactos/${proveedorEditando.id}`, {
+        ...formEditar,
+        numeroIdentificacion: formEditar.numeroIdentificacion?.trim() || undefined,
+        tipoIdentificacion: formEditar.numeroIdentificacion?.trim() ? formEditar.tipoIdentificacion || 'NIT' : undefined,
+      }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['proveedores'] });
       await queryClient.invalidateQueries({ queryKey: ['contactos'] });
@@ -186,7 +190,7 @@ export default function Proveedores() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <p>{proveedor.numeroIdentificacion}</p>
+                      <p>{proveedor.numeroIdentificacion || 'Identificación pendiente'}</p>
                       <p className="text-xs text-slate-400">{proveedor.tipoIdentificacion || '—'}</p>
                     </td>
                     <td className="px-4 py-3">
@@ -256,6 +260,7 @@ export default function Proveedores() {
             onSubmit={() => editar.mutate()}
             disabled={editar.isPending}
             error={editar.isError}
+            identificacionOpcional={!proveedorEditando.numeroIdentificacion}
           />
         </Modal>
       )}
@@ -295,6 +300,7 @@ function FormularioContacto({
   onSubmit,
   disabled,
   error,
+  identificacionOpcional = false,
 }: {
   form: any;
   setForm: (value: any) => void;
@@ -303,6 +309,7 @@ function FormularioContacto({
   onSubmit: () => void;
   disabled: boolean;
   error: boolean;
+  identificacionOpcional?: boolean;
 }) {
   const campo = (key: string) => ({
     value: form[key] ?? '',
@@ -330,7 +337,7 @@ function FormularioContacto({
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-[#10274d]">Número de identificación</label>
-          <input {...campo('numeroIdentificacion')} required className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
+          <input {...campo('numeroIdentificacion')} required={!identificacionOpcional} className="w-full rounded-xl border border-slate-200 px-3 py-2.5" />
         </div>
 
         <div className="md:col-span-2">
