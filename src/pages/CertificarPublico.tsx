@@ -602,7 +602,7 @@ function Finalizado({
       </h2>
 
       <p className="mt-2 text-sm leading-6 text-slate-500">
-        El proceso solicitado por {empresa} fue completado. También recibirás un correo con el certificado final y su enlace de verificación.
+        El proceso solicitado por {empresa} fue completado. {resultado.correoEnviado === false ? 'El proveedor no confirmó el correo. Puedes abrir el certificado aquí.' : 'Puedes abrir el certificado y su enlace de verificación aquí.'}
       </p>
 
       <p className="mt-4 text-sm font-semibold text-[#254a7e]">

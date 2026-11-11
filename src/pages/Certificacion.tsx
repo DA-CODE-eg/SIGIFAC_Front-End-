@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { API_BASE_URL, api } from '../api/client';
 import { feedback } from '../lib/feedback';
+import { isAxiosError } from 'axios';
 import { Link } from 'react-router-dom';
 import { tienePermiso } from '../lib/permisos';
 import { useAuthStore } from '../store/auth.store';
@@ -65,6 +66,8 @@ export default function Certificacion() {
   const [metodoFirma, setMetodoFirma] = useState('CODIGO');
   const { data: metodosFirma } = useQuery({
     queryKey: ['metodos-firma', usuario?.id],
+    enabled: !!usuario?.id,
+    refetchInterval: 15000,
     queryFn: async () => (await api.get<{ facial: boolean; motivo?: string }>('/certificacion/firma/metodos')).data,
   });
   const [uso, setUso] =
@@ -398,15 +401,15 @@ export default function Certificacion() {
               documentoOtro;
           }
 
-          return api.post(
+          return api.post<{ correoEnviado: boolean }>(
             '/certificacion/firma/solicitudes',
             payload,
           );
         },
 
       onSuccess:
-        async () => {
-          await qc.invalidateQueries(
+        async ({ data }) => {
+          void qc.invalidateQueries(
             {
               queryKey: [
                 'certificacion-solicitudes',
@@ -421,12 +424,19 @@ export default function Certificacion() {
           setMovimientoId('');
           setObservacion('');
 
-          await feedback.exito(
-            'Solicitud enviada',
-            'El destinatario recibió un correo con el botón “Ver documento”.',
-          );
+          if (data.correoEnviado === false) {
+            await feedback.error('Solicitud guardada', 'El proveedor no confirmó el envío. Usa Reenviar solicitud en el historial.');
+          } else {
+            await feedback.exito('Solicitud enviada', 'El proveedor de correo aceptó la invitación.');
+          }
         },
     });
+
+  const reenviar = useMutation({
+    mutationFn: (id: number) => api.post(`/certificacion/firma/solicitudes/${id}/reenviar`),
+    onSuccess: () => feedback.exito('Solicitud reenviada', 'El proveedor aceptó el correo y se restablecieron los intentos de la solicitud.'),
+    onError: (error) => feedback.error('No se pudo reenviar', isAxiosError(error) ? error.response?.data?.message ?? 'Intenta nuevamente.' : 'Intenta nuevamente.'),
+  });
 
   const construirContenido =
     async () => {
@@ -1086,16 +1096,23 @@ export default function Certificacion() {
             2. Destinatario y firma
           </h2>
 
-          <label className="mt-4 block text-sm font-medium text-slate-700">
-            Método de firma
-            <select value={metodoFirma} onChange={(e) => setMetodoFirma(e.target.value)}
-              className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3">
-              <option value="CODIGO">Código de verificación de 6 dígitos</option>
-              <option value="CODIGO_GRAFICA">Código de verificación + firma dibujada o subida</option>
-              <option value="CODIGO_FACIAL" disabled={!metodosFirma?.facial}>Código de verificación + facial</option>
-              <option value="FACIAL" disabled={!metodosFirma?.facial}>Solo facial</option>
-            </select>
-          </label>
+          <fieldset className="mt-4 min-w-0 space-y-2">
+            <legend className="mb-2 text-sm font-medium text-slate-700">Método de firma</legend>
+            {[
+              ['CODIGO', 'Código de verificación de 6 dígitos'],
+              ['CODIGO_GRAFICA', 'Código + firma dibujada o subida'],
+              ['CODIGO_FACIAL', 'Código + captura facial'],
+              ['FACIAL', 'Solo captura facial'],
+            ].map(([valor, nombre]) => (
+              <label key={valor} className="flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm has-[:disabled]:text-slate-500">
+                <input type="radio" name="metodoFirma" value={valor} checked={metodoFirma === valor}
+                  disabled={valor.includes('FACIAL') && !metodosFirma?.facial}
+                  onChange={() => setMetodoFirma(valor)} />
+                {nombre}
+              </label>
+            ))}
+          </fieldset>
+          {!metodosFirma && <p role="status" className="mt-2 text-xs text-slate-600">Comprobando disponibilidad de la cámara para firma…</p>}
           {metodosFirma?.motivo && <p className="mt-2 text-xs text-slate-600">
             {metodosFirma.motivo === 'ROL' ? 'Solo los administradores pueden iniciar una firma facial.' :
               metodosFirma.motivo === 'VERIFICADOR_NO_DISPONIBLE' ? 'El verificador facial no responde. Revisa el servicio y su conexión con el backend.' :
@@ -1295,6 +1312,12 @@ export default function Certificacion() {
                   >
                     <td className="py-3 font-semibold">
                       #{s.id}
+                      {s.estado === 'PENDIENTE' && s.tokenPublico && new Date(s.fechaVencimiento).getTime() > Date.now() && (
+                        <button type="button" disabled={reenviar.isPending} onClick={() => reenviar.mutate(s.id)}
+                          className="mt-1 block rounded-lg border border-slate-200 px-2 py-2 text-left text-xs text-[#254a7e] disabled:opacity-50">
+                          {reenviar.isPending && reenviar.variables === s.id ? 'Reenviando…' : 'Reenviar solicitud'}
+                        </button>
+                      )}
                     </td>
 
                     <td className="py-3">
