@@ -43,12 +43,8 @@ export default function Productos() {
 
           for (const registro of detalle?.registros ?? []) {
             const datos = registro.datos ?? {};
-            const proveedor =
-              typeof datos.proveedor === 'string'
-                ? datos.proveedor
-                : datos.proveedor?.nombreRazonSocial ??
-                  registro.proveedor?.nombreRazonSocial ??
-                  '';
+            const proveedor = registro.proveedor?.nombreRazonSocial ??
+              (typeof datos.proveedor === 'string' ? datos.proveedor : datos.proveedor?.nombreRazonSocial) ?? '';
 
             resultado.push({
               registroId: registro.id,
@@ -290,7 +286,10 @@ export default function Productos() {
                           onClick={() => {
                             setProductoEditando(p);
                             const { foto, camposImportados, ...campos } = p.datos;
-                            if (p.fichaEstandar) delete campos.cantidad;
+                            if (p.fichaEstandar) {
+                              delete campos.cantidad;
+                              campos.referencia ??= '';
+                            }
                             setDatosEditando(campos);
                           }}
                           className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold"

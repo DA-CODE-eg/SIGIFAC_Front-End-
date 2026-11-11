@@ -13,12 +13,22 @@ interface Objetivo {
   tipoDato: string;
 }
 
+interface HojaExcel {
+  nombre: string;
+  visible: boolean;
+  totalFilas: number;
+  filaEncabezadoSugerida: number;
+  primerasFilas: { numero: number; valores: string[] }[];
+}
+
 interface Preview {
   token: string;
   tipo: TipoCarga;
   nombreArchivo: string;
   totalFilas: number;
   columnasOrigen: string[];
+  columnasReservadasProveedor?: string[];
+  columnaCategoriaSugerida?: string | null;
   objetivos: Objetivo[];
   mapeoSugerido: Record<string, string>;
   resumen: {
@@ -50,6 +60,10 @@ export default function CargaMasiva() {
   const [tipo, setTipo] = useState<TipoCarga>('PRODUCTOS');
   const [archivo, setArchivo] = useState<File | null>(null);
   const [entidadId, setEntidadId] = useState('');
+  const [hojaElegida, setHojaElegida] = useState('');
+  const [encabezadoElegido, setEncabezadoElegido] = useState('');
+  const [ultimaFila, setUltimaFila] = useState('');
+  const [expandirCombinadas, setExpandirCombinadas] = useState(false);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [mapeo, setMapeo] = useState<Record<string, string>>({});
   const [columnaCategoria, setColumnaCategoria] = useState('');
@@ -80,6 +94,22 @@ export default function CargaMasiva() {
       (await api.get('/carga-masiva/historial')).data,
   });
 
+  const inspeccionar = useMutation({
+    mutationFn: async (documento: File) => {
+      const form = new FormData();
+      form.append('archivo', documento);
+      return (await api.post<{ hojas: HojaExcel[]; hojaSugerida: string }>('/carga-masiva/inspeccionar-excel', form)).data;
+    },
+  });
+  const esExcel = Boolean(archivo?.name.toLowerCase().endsWith('.xlsx'));
+  const estructura = inspeccionar.variables === archivo ? inspeccionar.data : undefined;
+  const hojaExcel = estructura?.hojas.find(hoja => hoja.nombre === (hojaElegida || estructura.hojaSugerida));
+  const filaEncabezado = encabezadoElegido || String(hojaExcel?.filaEncabezadoSugerida ?? 1);
+  const rangoValido = Boolean(hojaExcel && Number.isInteger(Number(filaEncabezado)) &&
+    Number(filaEncabezado) >= 1 && Number(filaEncabezado) < hojaExcel.totalFilas &&
+    (!ultimaFila || (Number.isInteger(Number(ultimaFila)) && Number(ultimaFila) > Number(filaEncabezado) &&
+      Number(ultimaFila) <= hojaExcel.totalFilas)));
+
   const previsualizar = useMutation({
     mutationFn: async () => {
       if (!archivo) throw new Error('Selecciona un archivo');
@@ -87,6 +117,12 @@ export default function CargaMasiva() {
       const form = new FormData();
       form.append('archivo', archivo);
       form.append('tipo', tipo);
+      if (hojaExcel) {
+        form.append('hoja', hojaExcel.nombre);
+        form.append('filaEncabezado', filaEncabezado);
+        if (ultimaFila) form.append('ultimaFila', ultimaFila);
+        form.append('expandirCombinadas', String(expandirCombinadas));
+      }
 
       if (tipo === 'PRODUCTOS') {
         form.append('inventarioId', String(inventarioId));
@@ -105,7 +141,7 @@ export default function CargaMasiva() {
       setPreview(data);
       setMapeo(data.mapeoSugerido ?? {});
       setConservarAdicionales(true);
-      setColumnaCategoria('');
+      setColumnaCategoria(data.columnaCategoriaSugerida ?? '');
       setResultado(null);
       await feedback.toast(
         data.resumen.conError > 0 ? 'warning' : 'success',
@@ -171,7 +207,7 @@ export default function CargaMasiva() {
   };
 
   const puedePrevisualizar =
-    Boolean(archivo) &&
+    Boolean(archivo) && (!esExcel || rangoValido) &&
     (tipo !== 'PRODUCTOS' ||
       (Boolean(inventarioId) && Boolean(entidadId)));
 
@@ -197,10 +233,16 @@ export default function CargaMasiva() {
   };
 
   const origenesMapeados = Object.values(mapeo).filter(Boolean);
+  const columnasReservadas = preview?.columnasReservadasProveedor ?? [];
+  const columnasProveedorSinAsignar = columnasReservadas.filter(columna => !origenesMapeados.includes(columna));
   const columnasAdicionales = preview?.tipo === 'PRODUCTOS'
-    ? preview.columnasOrigen.filter(columna => !origenesMapeados.includes(columna))
+    ? preview.columnasOrigen.filter(columna => !origenesMapeados.includes(columna) && !columnasReservadas.includes(columna))
     : [];
   const mapeoDuplicado = preview?.tipo === 'PRODUCTOS' && new Set(origenesMapeados).size !== origenesMapeados.length;
+  const gruposMapeo = preview?.tipo === 'PRODUCTOS' ? [
+    { titulo: 'Inventario', objetivos: preview.objetivos.filter(objetivo => !objetivo.campo.startsWith('proveedor')) },
+    { titulo: 'Proveedores', objetivos: preview.objetivos.filter(objetivo => objetivo.campo.startsWith('proveedor')) },
+  ] : [{ titulo: 'Contactos', objetivos: preview?.objetivos ?? [] }];
   const columnasVista = [
     ...(preview?.objetivos ?? []).flatMap(objetivo => mapeo[objetivo.campo]
       ? [{ origen: mapeo[objetivo.campo], etiqueta: objetivo.etiqueta, clave: objetivo.campo }]
@@ -338,11 +380,18 @@ export default function CargaMasiva() {
         <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6">
           <input
             type="file"
-            accept=".xlsx,.xls,.csv,.pdf"
+            accept=".xlsx,.csv,.pdf"
+            disabled={previsualizar.isPending || confirmar.isPending}
             onChange={(e) => {
-              setArchivo(e.target.files?.[0] ?? null);
+              const documento = e.target.files?.[0] ?? null;
+              setArchivo(documento);
+              setHojaElegida('');
+              setEncabezadoElegido('');
+              setUltimaFila('');
+              setExpandirCombinadas(false);
               setPreview(null);
               setResultado(null);
+              if (documento?.name.toLowerCase().endsWith('.xlsx')) inspeccionar.mutate(documento);
             }}
             className="block w-full text-sm text-slate-600"
           />
@@ -358,6 +407,59 @@ export default function CargaMasiva() {
             </div>
           )}
         </div>
+
+        {esExcel && inspeccionar.isPending && <p role="status" className="mt-3 text-sm text-slate-600">Leyendo las hojas del Excel…</p>}
+        {esExcel && inspeccionar.isError && (
+          <div className="mt-3 flex items-center gap-3 text-sm">
+            <p role="alert" className="text-red-700">No se pudieron leer las hojas del Excel.</p>
+            <button type="button" className="font-semibold text-[#254a7e]" onClick={() => archivo && inspeccionar.mutate(archivo)}>Reintentar</button>
+          </div>
+        )}
+        {hojaExcel && estructura && (
+          <fieldset disabled={previsualizar.isPending || confirmar.isPending}
+            className="mt-4 rounded-xl border border-slate-200 p-4 text-sm">
+            <legend className="px-2 font-semibold text-[#10274d]">Hoja y rango de datos</legend>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <label>Hoja del Excel
+                <select value={hojaExcel.nombre} onChange={e => {
+                  setHojaElegida(e.target.value);
+                  setEncabezadoElegido('');
+                  setUltimaFila('');
+                  setPreview(null);
+                }} className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2">
+                  {estructura.hojas.map(hoja => (
+                    <option key={hoja.nombre} value={hoja.nombre}>{hoja.nombre}{hoja.visible ? '' : ' (oculta)'}</option>
+                  ))}
+                </select>
+              </label>
+              <label>Fila de encabezados
+                <input type="number" min={1} max={Math.max(1, hojaExcel.totalFilas - 1)} value={filaEncabezado}
+                  onChange={e => { setEncabezadoElegido(e.target.value); setPreview(null); }}
+                  className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2" />
+              </label>
+              <label>Última fila de datos (opcional)
+                <input type="number" min={Number(filaEncabezado) + 1} max={hojaExcel.totalFilas}
+                  value={ultimaFila} placeholder={String(hojaExcel.totalFilas)}
+                  onChange={e => { setUltimaFila(e.target.value); setPreview(null); }}
+                  className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2" />
+              </label>
+            </div>
+            {!rangoValido && <p className="mt-2 text-red-700">Selecciona un encabezado con al menos una fila de datos debajo.</p>}
+            <label className="mt-3 flex items-center gap-2">
+              <input type="checkbox" checked={expandirCombinadas}
+                onChange={e => { setExpandirCombinadas(e.target.checked); setPreview(null); }} />
+              Repetir el valor de celdas combinadas verticalmente en las filas con datos
+            </label>
+            <details className="mt-3 text-slate-600">
+              <summary className="cursor-pointer font-semibold">Ver primeras filas para localizar encabezados</summary>
+              <ul className="mt-2 space-y-1">
+                {hojaExcel.primerasFilas.map(fila => (
+                  <li key={fila.numero} className="break-words">Fila {fila.numero} · {fila.valores.join(' · ')}</li>
+                ))}
+              </ul>
+            </details>
+          </fieldset>
+        )}
 
         <div className="mt-5 flex justify-end">
           <button
@@ -441,8 +543,13 @@ export default function CargaMasiva() {
               </h2>
             </div>
 
-            <div className="grid gap-3">
-              {preview.objetivos.map((objetivo) => (
+            {gruposMapeo.map(grupo => (
+              <fieldset key={grupo.titulo} className="mb-4 grid gap-3 rounded-xl border border-slate-200 p-3">
+                <legend className="px-2 text-sm font-semibold text-[#10274d]">{grupo.titulo}</legend>
+                {grupo.titulo === 'Proveedores' && (
+                  <p className="text-sm text-slate-600">Identifica al proveedor y asigna sus datos de contacto aquí. La ficha del producto muestra el nombre vinculado.</p>
+                )}
+              {grupo.objetivos.map((objetivo) => (
                 <div
                   key={objetivo.campo}
                   className="grid grid-cols-1 items-center gap-3 rounded-xl border border-slate-100 p-3 md:grid-cols-[1fr_40px_1fr]"
@@ -485,7 +592,8 @@ export default function CargaMasiva() {
                   </select>
                 </div>
               ))}
-            </div>
+              </fieldset>
+            ))}
 
             {preview.tipo === 'PRODUCTOS' && (
               <div className="mt-4 rounded-xl border border-slate-200 p-4">
@@ -503,8 +611,13 @@ export default function CargaMasiva() {
                 <label className="flex items-start gap-2 text-sm font-semibold text-[#10274d]">
                   <input type="checkbox" checked={conservarAdicionales}
                     onChange={e => setConservarAdicionales(e.target.checked)} />
-                  Conservar campos adicionales y guardar el formato para esta categoría
+                  Conservar columnas adicionales de producto
                 </label>
+                {columnasProveedorSinAsignar.length > 0 && (
+                  <p className="mt-2 text-sm text-amber-800">
+                    Columnas de contacto sin asignar. Se omitirán si no eliges su destino · {columnasProveedorSinAsignar.join(', ')}
+                  </p>
+                )}
                 {columnasAdicionales.length > 0 && (
                   <p className="mt-2 text-sm text-slate-600">
                     {conservarAdicionales ? 'Se guardarán en la ficha del producto' : 'Columnas que se omitirán'} · {columnasAdicionales.join(', ')}
@@ -513,7 +626,7 @@ export default function CargaMasiva() {
               </div>
             )}
             {mapeoDuplicado && <p role="alert" className="mt-4 text-sm text-red-600">
-              Asigna cada columna del archivo a un solo campo de inventario.
+              Asigna cada columna del archivo a un solo campo de destino.
             </p>}
             {erroresMapeo.length > 0 && (
               <p className="mt-4 text-sm text-red-600">
@@ -619,6 +732,13 @@ export default function CargaMasiva() {
                   {resultado.omitidas} · Errores:{' '}
                   {resultado.errores?.length ?? 0}
                 </p>
+                {Boolean(resultado.errores?.length) && (
+                  <ul className="mt-3 list-disc space-y-1 pl-5 text-red-800">
+                    {resultado.errores.slice(0, 20).map((item: { fila: number; error: string }) => (
+                      <li key={item.fila}>Fila {item.fila} · {item.error}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
           </section>
