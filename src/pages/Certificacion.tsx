@@ -1,4 +1,3 @@
-import { prepararReferenciaFacial } from '../components/VerificacionFacial';
 import {
   useMemo,
   useState,
@@ -64,9 +63,6 @@ export default function Certificacion() {
   };
 
   const [metodoFirma, setMetodoFirma] = useState('CODIGO');
-  const [fotoReferencia, setFotoReferencia] = useState<File | null>(null);
-  const [referenciaVerificada, setReferenciaVerificada] = useState(false);
-  const metodoFacial = metodoFirma === 'FACIAL' || metodoFirma === 'CODIGO_FACIAL';
   const { data: metodosFirma } = useQuery({
     queryKey: ['metodos-firma', usuario?.id],
     queryFn: async () => (await api.get<{ facial: boolean; motivo?: string }>('/certificacion/firma/metodos')).data,
@@ -363,9 +359,6 @@ export default function Certificacion() {
     useMutation({
       mutationFn:
         async () => {
-          if (metodoFacial && (!fotoReferencia || !referenciaVerificada)) {
-            throw new Error('Adjunta la foto frontal de referencia y confirma cómo verificaste su procedencia.');
-          }
           const contenido =
             await construirContenido();
 
@@ -375,7 +368,6 @@ export default function Certificacion() {
                 tipo,
               uso,
               metodoFirma,
-              ...(metodoFacial && fotoReferencia ? { fotoReferencia: await prepararReferenciaFacial(fotoReferencia), referenciaVerificada } : {}),
               observacion:
                 observacion ||
                 undefined,
@@ -1109,17 +1101,6 @@ export default function Certificacion() {
               metodosFirma.motivo === 'VERIFICADOR_NO_DISPONIBLE' ? 'El verificador facial no responde. Revisa el servicio y su conexión con el backend.' :
                 'La firma facial todavía no está configurada en el backend.'}
           </p>}
-          {metodoFacial && <fieldset className="mt-4 space-y-3 rounded-xl bg-slate-50 p-4 text-sm">
-            <legend className="font-semibold text-ink">Referencia facial del firmante</legend>
-            <label className="block">Foto frontal de referencia (JPG o PNG)
-              <input key={`${uso}-${contactoId}`} type="file" accept="image/jpeg,image/png" className="mt-1 block w-full"
-                onChange={e => { setFotoReferencia(e.target.files?.[0] ?? null); setReferenciaVerificada(false); }} />
-            </label>
-            <label className="flex gap-2">
-              <input type="checkbox" checked={referenciaVerificada} onChange={e => setReferenciaVerificada(e.target.checked)} />
-              <span>Verifiqué la identidad de este firmante y cuento con autorización para usar su foto de referencia en esta solicitud.</span>
-            </label>
-          </fieldset>}
           <div className="mt-4 grid grid-cols-2 gap-3">
             {(
               [
@@ -1135,8 +1116,6 @@ export default function Certificacion() {
                   type="button"
                   onClick={() => {
                     setUso(u);
-                    setFotoReferencia(null);
-                    setReferenciaVerificada(false);
                     setContactoId(
                       '',
                     );
@@ -1165,8 +1144,6 @@ export default function Certificacion() {
               }
               onChange={(e) => {
                 setContactoId(e.target.value);
-                setFotoReferencia(null);
-                setReferenciaVerificada(false);
               }}
               className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3"
             >

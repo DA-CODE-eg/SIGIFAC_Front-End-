@@ -325,14 +325,14 @@ export default function CertificarPublico() {
           </section>
         )}
 
-        {paso === 'FACIAL' && <VerificacionFacial token={token} sesionCorreo={codigoFacial ? firmaSession : undefined}
+        {paso === 'FACIAL' && <VerificacionFacial capturaSinReferencia={data?.capturaSinReferencia === true} token={token} sesionCorreo={codigoFacial ? firmaSession : undefined}
           onSuccess={sesion => { setFirmaSession(sesion); setPaso('IDENTIDAD'); }} />}
 
         {paso ===
           'IDENTIDAD' && (
           <section className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
             <div className="mb-5 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              {soloFacial ? 'Rostro verificado' : codigoFacial ? 'Correo y rostro verificados' : 'Correo validado'}
+              {(soloFacial || codigoFacial) && data?.capturaSinReferencia ? 'Rostro detectado y prueba de vida aprobada' : soloFacial ? 'Rostro verificado' : codigoFacial ? 'Correo y rostro verificados' : 'Correo validado'}
             </div>
 
             <h2 className="text-2xl font-semibold text-[#10274d]">

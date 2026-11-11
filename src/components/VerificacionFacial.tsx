@@ -13,21 +13,10 @@ function jpeg(origen: CanvasImageSource, ancho: number, alto: number) {
   return canvas.toDataURL('image/jpeg', 0.75);
 }
 
-export async function prepararReferenciaFacial(archivo: File) {
-  if (!['image/jpeg', 'image/png'].includes(archivo.type) || archivo.size > 5_000_000) {
-    throw new Error('Selecciona un archivo JPG o PNG de hasta 5 MB.');
-  }
-  const imagen = await createImageBitmap(archivo);
-  try {
-    return jpeg(imagen, imagen.width, imagen.height);
-  } finally {
-    imagen.close();
-  }
-}
-
-export default function VerificacionFacial({ token, sesionCorreo, onSuccess }: {
+export default function VerificacionFacial({ token, sesionCorreo, capturaSinReferencia, onSuccess }: {
   token: string;
   sesionCorreo?: string;
+  capturaSinReferencia: boolean;
   onSuccess: (sesion: string) => void;
 }) {
   const video = useRef<HTMLVideoElement>(null);
@@ -107,21 +96,21 @@ export default function VerificacionFacial({ token, sesionCorreo, onSuccess }: {
       <h2 className="text-xl font-semibold text-ink">Verificación facial</h2>
       {!reto && <label className="flex gap-3 text-sm text-slate-700">
         <input type="checkbox" checked={autoriza} onChange={e => setAutoriza(e.target.checked)} />
-        <span>Autorizo a Sertiva a procesar mis capturas y compararlas con la referencia autorizada para verificar mi identidad en esta solicitud. Las capturas se procesan en el verificador y el certificado registra el resultado. Si no deseas autorizar, puedes pedir al remitente otro método de firma.</span>
+        <span>{capturaSinReferencia ? 'Autorizo la comprobación de rostro y prueba de vida con mi cámara frontal.' : 'Autorizo comparar mis capturas con la referencia autorizada para esta solicitud.'}</span>
       </label>}
       {!reto && <label className="flex gap-3 text-sm text-slate-700">
         <input type="checkbox" disabled={!autoriza} checked={autoriza && autorizaFoto} onChange={e => setAutorizaFoto(e.target.checked)} />
-        <span>Autorizo conservar la primera captura frontal e incluirla en la copia interna del certificado, accesible a los administradores de la empresa remitente. Esta opción es voluntaria.</span>
+        <span>Autorizo conservar la primera captura frontal e incluirla en la copia interna del certificado, accesible a los administradores de la empresa remitente. {capturaSinReferencia ? '' : 'Esta opción es voluntaria.'}</span>
       </label>}
       <video ref={video} autoPlay muted playsInline hidden={!reto}
         className="aspect-video w-full rounded-xl bg-slate-900 object-contain" aria-label="Vista de la cámara" />
       {reto && <p role="status" className="text-sm font-semibold text-ink">
         {paso === 1 ? `Gira la cabeza hacia tu ${reto.direccion.toLowerCase()}` : 'Mira de frente a la cámara'}. Captura {paso + 1} de 3.
       </p>}
-      <button type="button" disabled={ocupado || (!reto && !autoriza)}
+      <button type="button" disabled={ocupado || (!reto && (!autoriza || (capturaSinReferencia && !autorizaFoto)))}
         className="rounded-xl bg-[#254a7e] px-4 py-2 font-semibold text-white disabled:opacity-50"
         onClick={() => { void (reto ? capturar() : iniciar()); }}>
-        {ocupado ? 'Procesando…' : reto ? 'Tomar captura' : 'Activar cámara'}
+        {ocupado ? 'Procesando…' : reto ? 'Tomar foto' : 'Activar cámara'}
       </button>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     </section>
