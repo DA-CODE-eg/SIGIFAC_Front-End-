@@ -7,6 +7,9 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
+import { tienePermiso } from '../lib/permisos';
+import { useAuthStore } from '../store/auth.store';
 import { api } from '../api/client';
 import { feedback } from '../lib/feedback';
 
@@ -291,6 +294,21 @@ export default function Facturas() {
       ).data,
     enabled:
       facturaDetalleId !== null,
+  });
+
+  const usuario = useAuthStore(s => s.usuario);
+  const anularPagoWompi = useMutation({
+    mutationFn: async ({ facturaId, pagoId }: { facturaId: number; pagoId: number }) =>
+      (await api.post<{ anulado: boolean }>(`/pagos/wompi/facturas/${facturaId}/pagos/${pagoId}/anular`)).data,
+    onSuccess: async ({ anulado }) => {
+      void queryClient.invalidateQueries();
+      if (anulado) await feedback.exito('Pago de prueba anulado', 'Ya puedes anular la factura si no tiene otros pagos aprobados.');
+      else await feedback.toast('info', 'Wompi aún no confirma la anulación. Revisa el estado del pago antes de repetir.');
+    },
+    onError: async error => {
+      const mensaje = isAxiosError(error) ? error.response?.data?.message : undefined;
+      await feedback.error('No se pudo anular el pago', typeof mensaje === 'string' ? mensaje : 'Revisa el estado en Wompi Sandbox.');
+    },
   });
 
   const crearFactura = useMutation({
@@ -1772,6 +1790,7 @@ export default function Facturas() {
                             : ''}
                         </p>
                       </div>
+                      <div className="text-right">
                       <p className="font-semibold">
                         {moneda(
                           Number(
@@ -1779,6 +1798,20 @@ export default function Facturas() {
                           ),
                         )}
                       </p>
+                      {pago.medioPago === 'WOMPI_SANDBOX' && pago.estadoTransaccion === 'APROBADO' &&
+                        tienePermiso(usuario, 'FACTURAS_ANULAR') && (
+                          <button type="button" disabled={anularPagoWompi.isPending}
+                            className="mt-2 rounded-lg border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-700 disabled:opacity-50"
+                            onClick={async () => {
+                              const confirmacion = await feedback.confirmar('¿Anular el pago de prueba?', 'Wompi debe confirmar la anulación de la transacción de tarjeta.', 'Anular pago');
+                              if (confirmacion.isConfirmed) {
+                                anularPagoWompi.mutate({ facturaId: detalleFactura.id, pagoId: pago.id });
+                              }
+                            }}>
+                            Anular pago de prueba
+                          </button>
+                      )}
+                      </div>
                     </div>
                   ),
                 )}
@@ -1802,6 +1835,7 @@ export default function Facturas() {
             </div>
 
             <label className="block text-sm font-semibold text-ink">
+              {checkoutUrlPago.startsWith('https://checkout.wompi.co/') && <span className="mb-2 block text-sm text-indigo-800">Wompi Sandbox · pago sin dinero real</span>}
               Canal de envío
               <select value={canalPago} onChange={e => setCanalPago(e.target.value as typeof canalPago)}
                 className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5">
