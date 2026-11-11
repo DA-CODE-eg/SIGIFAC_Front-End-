@@ -173,6 +173,7 @@ export default function Facturas() {
     isLoading: cargandoFacturas,
   } = useQuery<Factura[]>({
     queryKey: ['facturas-integradas'],
+    refetchInterval: 5_000,
     queryFn: async () =>
       (
         await api.get(
@@ -282,6 +283,7 @@ export default function Facturas() {
   const {
     data: detalleFactura,
   } = useQuery<any>({
+    refetchInterval: 5_000,
     queryKey: [
       'factura-detalle',
       facturaDetalleId,
@@ -516,13 +518,16 @@ export default function Facturas() {
     return `Sertiva · ${numero} · Saldo: ${moneda(Number(factura.saldoPendiente))}. Paga aquí: ${checkoutUrlPago}`;
   };
 
-  const descargarFacturaPdf = async (factura: Factura) => {
+  const descargarFacturaPdf = (factura: Factura) =>
+    descargarPdf(`/pagos/factura/${factura.id}/pdf`, `factura-${factura.id}.pdf`);
+
+  const descargarPdf = async (ruta: string, nombre: string) => {
     try {
-      const { data } = await api.get<Blob>(`/pagos/factura/${factura.id}/pdf`, { responseType: 'blob' });
+      const { data } = await api.get<Blob>(ruta, { responseType: 'blob' });
       const url = URL.createObjectURL(data);
       const enlace = document.createElement('a');
       enlace.href = url;
-      enlace.download = `factura-${factura.id}.pdf`;
+      enlace.download = nombre;
       enlace.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch {
@@ -1798,6 +1803,16 @@ export default function Facturas() {
                           ),
                         )}
                       </p>
+                      {pago.medioPago === 'WOMPI_SANDBOX' && ['APROBADO', 'ANULADO'].includes(pago.estadoTransaccion) && (
+                        <button type="button"
+                          className="mt-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-blue-800"
+                          onClick={() => descargarPdf(
+                            `/pagos/factura/${detalleFactura.id}/pagos/${pago.id}/comprobante`,
+                            `comprobante-pago-${pago.id}.pdf`,
+                          )}>
+                          Descargar comprobante
+                        </button>
+                      )}
                       {pago.medioPago === 'WOMPI_SANDBOX' && pago.estadoTransaccion === 'APROBADO' &&
                         tienePermiso(usuario, 'FACTURAS_ANULAR') && (
                           <button type="button" disabled={anularPagoWompi.isPending}
