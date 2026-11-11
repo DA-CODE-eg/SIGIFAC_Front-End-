@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
+import { isAxiosError } from 'axios';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
@@ -49,6 +50,9 @@ export default function InventarioSedes() {
   const [operacion, setOperacion] = useState<Operacion>('ENTRADA');
   const [recepcion, setRecepcion] = useState<number>();
   const [mensaje, setMensaje] = useState('');
+  const [errorOperacion, setErrorOperacion] = useState('');
+  const [origen, setOrigen] = useState('');
+  const [loteOperacion, setLoteOperacion] = useState('0');
 
   const estructura = useQuery({
     queryKey: ['estructura-inventario', empresaId],
@@ -77,13 +81,25 @@ export default function InventarioSedes() {
     onSuccess: async () => {
       setMensaje('Operación registrada.');
       setRecepcion(undefined);
-      await cache.invalidateQueries();
+      await Promise.all([
+        cache.invalidateQueries({ queryKey: ['detalle-sedes', empresaId] }),
+        cache.invalidateQueries({ queryKey: ['estructura-inventario', empresaId] }),
+        cache.invalidateQueries({ queryKey: ['catalogo-sedes', empresaId] }),
+      ]);
     },
-    onError: () => setMensaje('Revisa el mensaje de error antes de volver a intentar.'),
+    onError: (error) => {
+      const respuesta = isAxiosError(error) ? error.response : undefined;
+      const mensaje = respuesta?.data?.message;
+      setErrorOperacion(respuesta && respuesta.status < 500 && typeof mensaje === 'string'
+        ? mensaje
+        : 'No se pudo confirmar la operación. Actualiza el detalle antes de repetirla.');
+      if (respuesta?.status === 400 || respuesta?.status === 409) void detalle.refetch();
+    },
   });
 
   function enviar(ruta: string, datos?: object, patch = false) {
     setMensaje('');
+    setErrorOperacion('');
     guardar.mutate({ ruta, datos, patch });
   }
 
@@ -112,11 +128,18 @@ export default function InventarioSedes() {
     return id === 0 ? 'Sin lote' : detalle.data?.lotes.find((lote) => lote.id === id)?.codigo ?? `Lote #${id}`;
   }
 
-  function opcionesBodega() {
-    return bodegas.map((bodega) => <option key={bodega.id} value={bodega.id}>{bodegaNombre(bodega.id)}</option>);
+  function opcionesBodega(excluir?: string) {
+    return bodegas.filter((bodega) => String(bodega.id) !== excluir).map((bodega) => <option key={bodega.id} value={bodega.id}>{bodegaNombre(bodega.id)}</option>);
   }
 
   const datos = detalle.data;
+  const origenActual = origen || String(datos?.principalId ?? bodegas[0]?.id ?? '');
+  function saldoDisponible(bodegaId: number, loteId: number) {
+    if (loteId === 0 && bodegaId === datos?.principalId) return Number(datos.disponiblePrincipal);
+    return Number(datos?.saldos.find((saldo) => saldo.bodegaId === bodegaId && saldo.loteId === loteId)?.cantidad ?? 0);
+  }
+  const descuenta = operacion === 'SALIDA' || operacion === 'TRASLADO' || operacion === 'ASIGNAR';
+  const disponible = saldoDisponible(Number(origenActual), operacion === 'ASIGNAR' ? 0 : Number(loteOperacion));
   const existencias = datos ? [
     ...(datos.principalId ? [{ bodegaId: datos.principalId, loteId: 0, cantidad: datos.disponiblePrincipal }] : []),
     ...datos.saldos,
@@ -134,6 +157,7 @@ export default function InventarioSedes() {
       <p className="my-2 text-sm text-slate-600">Las existencias actuales se mostrarán en Sede principal / Bodega principal, sin lote.</p>
       {crear && <button type="button" className={primary} disabled={guardar.isPending} onClick={() => enviar('/activar')}>Activar inventario por sede</button>}
     </section>}
+    {errorOperacion && <p role="alert" className="sticky top-0 z-10 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{errorOperacion}</p>}
     {mensaje && <p role="status" className="rounded-xl bg-indigo-50 p-3 text-sm">{mensaje}</p>}
     {principales && <>
       <section className={card}>
@@ -163,7 +187,7 @@ export default function InventarioSedes() {
           <label className="min-w-48 flex-1 text-sm">Buscar por nombre, código o referencia<input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className={field} /></label>
           <button className={secondary}>Buscar</button>
         </form>
-        <label className="block text-sm">Producto<select className={field} value={registro} onChange={(e) => { setRegistro(e.target.value); setRecepcion(undefined); }}>
+        <label className="block text-sm">Producto<select className={field} value={registro} onChange={(e) => { setRegistro(e.target.value); setRecepcion(undefined); setLoteOperacion('0'); setErrorOperacion(''); }}>
           <option value="">Selecciona un producto</option>
           {registro && !productos.data?.some((producto) => String(producto.registroId) === registro) && <option value={registro}>PRD-{registro}</option>}
           {productos.data?.map((producto) => <option key={producto.registroId} value={producto.registroId}>{producto.codigo} · {producto.nombre}</option>)}
@@ -198,17 +222,19 @@ export default function InventarioSedes() {
             <button className={secondary} disabled={guardar.isPending}>Crear lote</button>
           </form>
           <form key={`${registro}-${operacion}`} onSubmit={operar} className="grid items-end gap-3 border-t border-slate-200 pt-4 sm:grid-cols-2 xl:grid-cols-4">
-            <label className="text-sm">Operación<select className={field} value={operacion} onChange={(e) => setOperacion(e.target.value as Operacion)}>
+            <label className="text-sm">Operación<select className={field} value={operacion} onChange={(e) => { setOperacion(e.target.value as Operacion); setLoteOperacion('0'); setErrorOperacion(''); }}>
               <option value="ENTRADA">Entrada</option><option value="SALIDA">Salida</option><option value="TRASLADO">Crear traslado</option><option value="CONTEO">Conteo físico</option><option value="ASIGNAR">Asignar unidades a un lote</option>
             </select></label>
-            <label className="text-sm">{operacion === 'TRASLADO' ? 'Bodega de origen' : 'Bodega'}<select name="bodega" className={field} required>{opcionesBodega()}</select></label>
-            {operacion === 'TRASLADO' && <label className="text-sm">Bodega de destino<select name="destino" className={field} required defaultValue=""><option value="">Selecciona destino</option>{opcionesBodega()}</select></label>}
-            <label className="text-sm">{operacion === 'ASIGNAR' ? 'Lote de destino' : 'Lote'}<select className={field} name="lote" required>
+            <label className="text-sm">{operacion === 'TRASLADO' ? 'Bodega de origen' : 'Bodega'}<select name="bodega" className={field} value={origenActual} onChange={(e) => setOrigen(e.target.value)} required>{opcionesBodega()}</select></label>
+            {operacion === 'TRASLADO' && <label className="text-sm">Bodega de destino<select key={origenActual} name="destino" className={field} required defaultValue=""><option value="">Selecciona destino</option>{opcionesBodega(origenActual)}</select></label>}
+            <label className="text-sm">{operacion === 'ASIGNAR' ? 'Lote de destino' : 'Lote'}<select className={field} name="lote" value={operacion === 'ASIGNAR' && loteOperacion === '0' ? '' : loteOperacion} onChange={(e) => setLoteOperacion(e.target.value)} required>
               {operacion === 'ASIGNAR' ? <option value="">Selecciona un lote</option> : <option value="0">Sin lote</option>}{datos.lotes.map((lote) => <option key={lote.id} value={lote.id}>{lote.codigo}</option>)}
             </select></label>
-            <label className="text-sm">{operacion === 'CONTEO' ? 'Cantidad contada' : 'Cantidad'}<input className={field} type="number" name="cantidad" step="0.001" min={operacion === 'CONTEO' ? 0 : 0.001} required /></label>
+            <label className="text-sm">{operacion === 'CONTEO' ? 'Cantidad contada' : 'Cantidad'}<input className={field} type="number" name="cantidad" step="0.001" min={operacion === 'CONTEO' ? 0 : 0.001} max={descuenta ? Math.max(0, disponible) : undefined} required />
+              {descuenta && <span className="mt-1 block text-xs text-slate-600">Disponible {disponible}{operacion === 'ASIGNAR' ? ' sin lote' : ''}</span>}
+            </label>
             {operacion !== 'TRASLADO' && <label className="text-sm sm:col-span-2">Motivo<input className={field} name="motivo" required maxLength={250} /></label>}
-            <button className={primary} disabled={guardar.isPending}>Registrar</button>
+            <button className={primary} disabled={guardar.isPending || (descuenta && disponible <= 0) || (operacion === 'TRASLADO' && bodegas.length < 2)}>Registrar</button>
           </form>
         </section>}
 
@@ -218,9 +244,10 @@ export default function InventarioSedes() {
             {datos.traslados.map((t) => <tr key={t.id}>
               <td>#{t.id}</td><td>{bodegaNombre(t.origenId)} → {bodegaNombre(t.destinoId)}</td><td>{loteNombre(t.loteId)}</td><td>{t.cantidad}{t.recibida !== null && ` · Recibida: ${t.recibida}`}</td><td>{accionAuditoria(t.estado)}{t.diferenciaMotivo && <p>{t.diferenciaMotivo}</p>}</td>
               <td className="space-x-1">{mover && t.estado === 'PENDIENTE' && <>
-                <button className={secondary} disabled={guardar.isPending} onClick={() => enviar(`/traslados/${t.id}`, { accion: 'DESPACHAR' }, true)}>Despachar</button>
+                <button className={secondary} disabled={guardar.isPending || saldoDisponible(t.origenId, t.loteId) < Number(t.cantidad)} onClick={() => enviar(`/traslados/${t.id}`, { accion: 'DESPACHAR' }, true)}>Despachar</button>
+                {saldoDisponible(t.origenId, t.loteId) < Number(t.cantidad) && <p className="mt-1 whitespace-normal text-xs text-red-700">Origen con saldo insuficiente. Disponible {saldoDisponible(t.origenId, t.loteId)}.</p>}
                 <button className={secondary} disabled={guardar.isPending} onClick={() => enviar(`/traslados/${t.id}`, { accion: 'CANCELAR' }, true)}>Cancelar</button>
-              </>}{mover && t.estado === 'EN_TRANSITO' && <button className={secondary} disabled={guardar.isPending} onClick={() => setRecepcion(t.id)}>Recibir</button>}</td>
+              </>}{mover && t.estado === 'EN_TRANSITO' && <button className={secondary} disabled={guardar.isPending} onClick={() => { setRecepcion(t.id); setErrorOperacion(''); }}>Recibir</button>}</td>
             </tr>)}
           </Tabla>
           {!datos.traslados.length && <p className="mt-3 text-sm text-slate-600">Todavía no hay traslados.</p>}
