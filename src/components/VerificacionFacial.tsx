@@ -28,6 +28,7 @@ export default function VerificacionFacial({ token, sesionCorreo, capturaSinRefe
   const [autorizaFoto, setAutorizaFoto] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [paso, setPaso] = useState(0);
+  const [foto, setFoto] = useState('');
   const [error, setError] = useState('');
 
   const cerrarCamara = () => {
@@ -59,6 +60,7 @@ export default function VerificacionFacial({ token, sesionCorreo, capturaSinRefe
       if (!montado.current) return;
       if (video.current) video.current.srcObject = stream;
       setPaso(0);
+      setFoto('');
       setReto(data);
     } catch (e) {
       cerrarCamara();
@@ -70,15 +72,24 @@ export default function VerificacionFacial({ token, sesionCorreo, capturaSinRefe
 
   const capturar = async () => {
     if (!reto || !video.current?.videoWidth || video.current.readyState < 2) return;
-    capturas.current.push(jpeg(video.current, video.current.videoWidth, video.current.videoHeight));
+    const imagen = jpeg(video.current, video.current.videoWidth, video.current.videoHeight);
+    if (capturaSinReferencia) {
+      setFoto(imagen);
+      return;
+    }
+    capturas.current.push(imagen);
     if (capturas.current.length < 3) {
       setPaso(capturas.current.length);
       return;
     }
+    await validar(reto.id, capturas.current);
+  };
+
+  const validar = async (id: string, imagenes: string[]) => {
     setOcupado(true);
     cerrarCamara();
     try {
-      const { data } = await api.post(`/certificacion/firma/publica/${token}/facial/validar`, { id: reto.id, capturas: capturas.current });
+      const { data } = await api.post(`/certificacion/firma/publica/${token}/facial/validar`, { id, capturas: imagenes });
       if (montado.current) onSuccess(data.firmaSession);
     } catch (e) {
       if (montado.current) setError(isAxiosError(e) ? e.response?.data?.message ?? 'Intenta nuevamente con buena iluminación.' : 'No se pudo validar el rostro.');
@@ -86,6 +97,7 @@ export default function VerificacionFacial({ token, sesionCorreo, capturaSinRefe
       capturas.current = [];
       if (montado.current) {
         setReto(null);
+        setFoto('');
         setOcupado(false);
       }
     }
@@ -96,22 +108,31 @@ export default function VerificacionFacial({ token, sesionCorreo, capturaSinRefe
       <h2 className="text-xl font-semibold text-ink">Verificación facial</h2>
       {!reto && <label className="flex gap-3 text-sm text-slate-700">
         <input type="checkbox" checked={autoriza} onChange={e => setAutoriza(e.target.checked)} />
-        <span>{capturaSinReferencia ? 'Autorizo la comprobación de rostro y prueba de vida con mi cámara frontal.' : 'Autorizo comparar mis capturas con la referencia autorizada para esta solicitud.'}</span>
+        <span>{capturaSinReferencia ? 'Autorizo la detección de rostro y análisis de la foto con mi cámara frontal.' : 'Autorizo comparar mis capturas con la referencia autorizada para esta solicitud.'}</span>
       </label>}
       {!reto && <label className="flex gap-3 text-sm text-slate-700">
         <input type="checkbox" disabled={!autoriza} checked={autoriza && autorizaFoto} onChange={e => setAutorizaFoto(e.target.checked)} />
-        <span>Autorizo conservar la primera captura frontal e incluirla en la copia interna del certificado, accesible a los administradores de la empresa remitente. {capturaSinReferencia ? '' : 'Esta opción es voluntaria.'}</span>
+        <span>Autorizo conservar la captura frontal e incluirla en la copia interna del certificado, accesible a los administradores de la empresa remitente. {capturaSinReferencia ? '' : 'Esta opción es voluntaria.'}</span>
       </label>}
-      <video ref={video} autoPlay muted playsInline hidden={!reto}
-        className="aspect-video w-full rounded-xl bg-slate-900 object-contain" aria-label="Vista de la cámara" />
-      {reto && <p role="status" className="text-sm font-semibold text-ink">
+      <video ref={video} autoPlay muted playsInline hidden={!reto || !!foto}
+        className={!reto || foto ? "hidden" : "aspect-video w-full rounded-xl bg-slate-900 object-contain"} aria-label="Vista de la cámara" />
+      {foto && <img src={foto} alt="Vista previa de tu foto" className="aspect-video w-full rounded-xl bg-slate-900 object-contain" />}
+      {reto && capturaSinReferencia && !foto && <p role="status" className="text-sm font-semibold text-ink">Mira de frente y centra tu rostro.</p>}
+      {reto && !capturaSinReferencia && <p role="status" className="text-sm font-semibold text-ink">
         {paso === 1 ? `Gira la cabeza hacia tu ${reto.direccion.toLowerCase()}` : 'Mira de frente a la cámara'}. Captura {paso + 1} de 3.
       </p>}
-      <button type="button" disabled={ocupado || (!reto && (!autoriza || (capturaSinReferencia && !autorizaFoto)))}
+      {foto && reto ? <div className="flex flex-wrap gap-3">
+        <button type="button" disabled={ocupado} onClick={() => setFoto('')}
+          className="rounded-xl border border-slate-300 px-4 py-2 font-semibold disabled:opacity-50">Repetir foto</button>
+        <button type="button" disabled={ocupado} onClick={() => { void validar(reto.id, [foto]); }}
+          className="rounded-xl bg-[#254a7e] px-4 py-2 font-semibold text-white disabled:opacity-50">
+          {ocupado ? 'Validando…' : 'Usar esta foto'}
+        </button>
+      </div> : <button type="button" disabled={ocupado || (!reto && (!autoriza || (capturaSinReferencia && !autorizaFoto)))}
         className="rounded-xl bg-[#254a7e] px-4 py-2 font-semibold text-white disabled:opacity-50"
         onClick={() => { void (reto ? capturar() : iniciar()); }}>
         {ocupado ? 'Procesando…' : reto ? 'Tomar foto' : 'Activar cámara'}
-      </button>
+      </button>}
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     </section>
   );
